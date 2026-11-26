@@ -101,15 +101,37 @@ export function shareGrid(result) {
   return out;
 }
 
+const SQUARES = ['🟩', '🟨', '🟧', '🟥'];
 const BARS = ['▁', '▃', '▅', '▇'];
+const SUIT_EMOJI = { spades: '♠️', hearts: '♥️', diamonds: '♦️', clubs: '♣️' };
 const SUIT_CHAR = { spades: '♠', hearts: '♥', diamonds: '♦', clubs: '♣' };
 
-export function shareText(n, rec, url) {
-  const lines = [`Parlor Daily #${n} · FreeCell`, `${fmt(rec.time)} · ${rec.moves} moves`];
-  for (const s of FOUNDATION_SUITS) lines.push(`${SUIT_CHAR[s]} ${rec.grid[s].map((q) => BARS[q]).join('')}`);
-  lines.push('Same deal, your turn.', url);
+/** Share text formats from design/daily/CopyShare.dc.html. */
+export const SHARE_FORMAT = 'squares'; // 'squares' | 'bars' | 'short'
+
+/** The link shown in shares: no scheme (chat apps still link it), keeps ?ref=share for the metrics. */
+export function shareLink(href) {
+  return href.replace(/^https?:\/\//, '');
+}
+
+export function shareText(n, rec, link, format = SHARE_FORMAT) {
+  const tail = `Same deal, your turn → ${link}`;
+  if (format === 'short') return `Parlor Daily #${n} ♠♥♦♣ solved in ${fmt(rec.time)} (${rec.moves} moves). ${tail}`;
+  const squares = format !== 'bars';
+  const lines = [`Parlor Daily #${n} · FreeCell`, `${squares ? 'Solved in ' : ''}${fmt(rec.time)} · ${rec.moves} moves`];
+  for (const s of FOUNDATION_SUITS) {
+    const marks = rec.grid[s].map((q) => (squares ? SQUARES : BARS)[q]).join('');
+    lines.push(`${squares ? SUIT_EMOJI[s] : SUIT_CHAR[s]} ${marks}`);
+  }
+  lines.push(tail);
   return lines.join('\n');
 }
+
+export const SHARE_CAPTION = {
+  squares: 'Each square is a card, ace to king: green went home early, red late. No spoilers.',
+  bars: 'Each bar is a card, ace to king. Taller bars went home later. No spoilers.',
+  short: 'One line: fits a group chat or a post.',
+};
 
 function fmt(ms) {
   const s = Math.floor(ms / 1000);

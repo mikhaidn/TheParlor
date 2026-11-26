@@ -2,7 +2,6 @@
 // image + text where the platform supports files, text otherwise, clipboard last.
 
 import { FOUNDATION_SUITS } from './engine.js';
-import { shareText } from './daily.js';
 import { formatTime } from './store.js';
 
 const SUIT_PATHS = {
@@ -76,30 +75,33 @@ export async function drawShareCard({ n, rec, streak, dateLabel, linkLabel }) {
   return new Promise((resolve) => c.toBlob(resolve, 'image/png'));
 }
 
-/** Returns 'shared' | 'copied' | 'downloaded' | 'cancelled' */
-export async function shareResult({ n, rec, streak, dateLabel, url }) {
-  const text = shareText(n, rec, url);
-  const linkLabel = url.replace(/^https?:\/\//, '').replace(/\?.*$/, '');
-  let file = null;
-  try {
-    const blob = await drawShareCard({ n, rec, streak, dateLabel, linkLabel });
-    if (blob) file = new File([blob], `parlor-daily-${n}.png`, { type: 'image/png' });
-  } catch { /* text only */ }
+export async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { /* fall back below */ }
+  // Older Safari / insecure contexts: a hidden textarea + execCommand.
+  const ta = Object.assign(document.createElement('textarea'), { value: text, readOnly: true });
+  Object.assign(ta.style, { position: 'fixed', opacity: '0', inset: '0' });
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch { ok = false; }
+  ta.remove();
+  return ok;
+}
 
-  if (navigator.share) {
-    try {
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text });
-      else await navigator.share({ text });
-      return 'shared';
-    } catch (e) {
-      if (e && e.name === 'AbortError') return 'cancelled';
-    }
+export const canShareNatively = () => typeof navigator.share === 'function';
+
+/** Returns 'shared' | 'cancelled' | 'failed' */
+export async function shareTextNatively(text) {
+  try { await navigator.share({ text }); return 'shared'; } catch (e) { return e && e.name === 'AbortError' ? 'cancelled' : 'failed'; }
+}
+
+/** The share card as a PNG: through the share sheet where files are supported (phones), else a download. */
+export async function saveImage({ n, rec, streak, dateLabel, link }) {
+  const blob = await drawShareCard({ n, rec, streak, dateLabel, linkLabel: link.replace(/\?.*$/, '') });
+  if (!blob) return 'failed';
+  const file = new File([blob], `parlor-daily-${n}.png`, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return 'shared'; } catch (e) { if (e && e.name === 'AbortError') return 'cancelled'; }
   }
-  try { await navigator.clipboard.writeText(text); return 'copied'; } catch { /* fall through */ }
-  if (file) {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name;
-    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
-    return 'downloaded';
-  }
-  return 'cancelled';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  return 'downloaded';
 }

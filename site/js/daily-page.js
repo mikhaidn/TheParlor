@@ -8,8 +8,8 @@ import { boot, P } from './boot.js';
 import { mountGame, toast } from './table.js';
 import { read, formatTime, persist } from './store.js';
 import { track } from './analytics.js';
-import { dailyNumber, dateOf, dealFor, formatDate, msUntilNextDaily, records, markStarted, saveResult, summary } from './daily.js';
-import { shareResult } from './share.js';
+import { dailyNumber, dateOf, dealFor, formatDate, msUntilNextDaily, records, markStarted, saveResult, summary, shareText, shareLink, SHARE_FORMAT, SHARE_CAPTION } from './daily.js';
+import { copyText, canShareNatively, shareTextNatively, saveImage } from './share.js';
 
 /** Set to a Stripe Payment Link (or similar) to show "Tip the table". */
 const TIP_URL = null;
@@ -144,13 +144,8 @@ function result() {
     h('div', { class: 'pd-row' }, P.Suit({ suit, size: 16, label: suit }), h('div', { class: 'pd-cells' }, rec.grid[suit].map((q) => h('i', { 'data-q': q })))));
 
   const note = h('div', { class: 'pd-muted' }, `Replays don’t change today’s result. Next deal in ${nextIn()}.`);
-  const shareBtn = h('button', { class: 'pa-btn pa-btn-primary', type: 'button', onclick: async () => {
-    const url = new URL('./?ref=share', location.href).href;
-    const how = await shareResult({ n, rec, streak: s.streak, dateLabel: longDate(), url });
-    if (how !== 'cancelled') track('share_tap', { daily_no: n, method: how });
-    if (how === 'copied') toast('Result copied. Paste it anywhere.');
-    if (how === 'downloaded') toast('Share card saved.');
-  } }, svgIcon('M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'), 'Share result');
+  const shareBtn = h('button', { class: 'pa-btn pa-btn-primary', type: 'button', onclick: () => openShare(rec, s.streak) },
+    svgIcon('M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'), 'Share result');
 
   view.append(h('div', { class: 'pd-result' },
     h('div', { class: 'pd-result-bar' },
@@ -174,6 +169,46 @@ function result() {
         h('a', { class: 'pa-btn pa-btn-felt', href: '#replay' }, 'Replay this deal'),
         note))));
   countdown = setInterval(() => { note.textContent = `Replays don’t change today’s result. Next deal in ${nextIn()}.`; }, 30000);
+}
+
+// ---------- Share sheet (design/daily/CopyShare.dc.html) ----------
+function openShare(rec, streak) {
+  const link = shareLink(new URL('./?ref=share', location.href).href);
+  const text = shareText(n, rec, link, SHARE_FORMAT);
+  const ICON_COPY = 'M9 9h10v10H9zM5 15V5h10', ICON_DONE = 'M5 12.5l4.5 4.5L19 7.5';
+  const label = h('span', {}, 'Copy text');
+  const icon = svgIcon(ICON_COPY);
+  let close;
+
+  const copyBtn = h('button', { class: 'pa-btn pa-btn-primary', type: 'button', onclick: async () => {
+    const ok = await copyText(text);
+    if (!ok) { toast('Couldn’t copy here. Select the text and copy it.'); return; }
+    track('share_tap', { daily_no: n, method: 'copy' });
+    label.textContent = 'Copied';
+    icon.replaceWith(svgIcon(ICON_DONE));
+    setTimeout(() => close(), 900);
+  } }, icon, label);
+
+  const native = canShareNatively() ? h('button', { class: 'pa-btn pa-btn-outline', type: 'button', onclick: async () => {
+    const how = await shareTextNatively(text);
+    if (how === 'shared') { track('share_tap', { daily_no: n, method: 'share' }); close(); }
+  } }, svgIcon('M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'), 'Share…') : null;
+
+  const image = h('button', { class: 'pa-btn pa-btn-outline', type: 'button', onclick: async () => {
+    const how = await saveImage({ n, rec, streak, dateLabel: longDate(), link });
+    if (how === 'shared' || how === 'downloaded') track('share_tap', { daily_no: n, method: 'image' });
+    if (how === 'downloaded') toast('Share card saved.');
+  } }, svgIcon('M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5'), 'Save image');
+
+  const preview = h('div', { class: 'pd-share-preview', tabindex: '0', 'aria-label': 'Text that will be copied' }, text);
+  const sheet = P.Sheet({
+    title: 'Share result',
+    className: 'pd-share',
+    children: [preview, h('p', { class: 'pl-caption pd-share-caption' }, SHARE_CAPTION[SHARE_FORMAT]), copyBtn,
+      h('div', { class: 'pd-share-row' + (native ? '' : ' is-single') }, native, image)],
+    onClose: () => close(),
+  });
+  close = P.openSheet(sheet);
 }
 
 addEventListener('hashchange', route);

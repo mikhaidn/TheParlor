@@ -135,3 +135,16 @@ a { color: inherit; }
 .pd-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 .pd-actions .pd-muted { text-align: center; font: 400 13px/18px var(--font-ui); }
 .pd-next { text-align: center; font: 400 13px/18px var(--font-ui); }
+
+/* ---------- Daily: Share sheet (design/daily/CopyShare.dc.html) ---------- */
+.pd-share .pl-sheet-body { display: flex; flex-direction: column; gap: 14px; padding-bottom: max(var(--space-6), env(safe-area-inset-bottom)); }
+.pd-share-preview {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-md); padding: 14px;
+  font: 400 15px/22px var(--font-ui); font-variant-numeric: tabular-nums; white-space: pre-wrap; overflow-wrap: anywhere;
+  user-select: text; -webkit-user-select: text; color: var(--ink);
+}
+.pd-share-preview:focus-visible { outline: 2px solid var(--focus-chrome); outline-offset: 2px; }
+.pd-share-caption { margin: -6px 0 0; }
+.pd-share-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pd-share-row.is-single { grid-template-columns: minmax(0, 1fr); }
+.pd-share .pa-btn-outline { color: var(--ink); }
