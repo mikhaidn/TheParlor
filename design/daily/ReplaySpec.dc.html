@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Replay code v1: how moves are encoded</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; background: #f6f2e8; color: #1d1f1e; font-family: 'Instrument Sans', system-ui, sans-serif; padding: 40px 24px 56px">
+  <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px">
+
+    <header style="display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">PROPOSAL · REPLAY CODE V1</div>
+      <h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 44px; line-height: 48px; font-weight: 600; letter-spacing: -0.01em">One byte per move</h1>
+      <p style="margin: 0; max-width: 760px; font-size: 17px; line-height: 26px; color: #5b605c">A solve becomes a short code: who dealt what, then every action the player took, undos included. Paste it or scan it and the replay rebuilds the game step by step. The example on this page is a real solve of Daily #2 (deal #8927), encoded by the shipped encoder and decoded back to a won game.</p>
+    </header>
+
+    <section aria-labelledby="pos-h" style="background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 24px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap">
+        <h2 id="pos-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">1 · Sixteen positions, one hex digit each</h2>
+        <span style="font-size: 15px; line-height: 22px; color: #5b605c">Standard FreeCell notation underneath, so the move list is readable too.</span>
+      </div>
+      <div style="background: #1f5b43; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 20px; color: #f4efe3; overflow-x: auto">
+        <div style="display: flex; justify-content: space-between; gap: 24px; min-width: 760px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #bcd2c5">FREE CELLS</div>
+            <div style="display: flex; gap: 10px">
+              <sc-for list="{{cells}}" as="p" hint-placeholder-count="4">
+                <div style="width: 80px; height: 104px; box-sizing: border-box; border-radius: 6px; background: #17462f; box-shadow: 0 0 0 1px #8fb9a3 inset; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                  <span style="font-family: Fraunces, Georgia, serif; font-size: 34px; line-height: 38px; font-weight: 600">{{p.n}}</span>
+                  <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #bcd2c5">{{p.sub}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #bcd2c5">FOUNDATIONS · NEVER A SOURCE</div>
+            <div style="display: flex; gap: 10px">
+              <sc-for list="{{founds}}" as="p" hint-placeholder-count="4">
+                <div style="width: 80px; height: 104px; box-sizing: border-box; border-radius: 6px; background: #17462f; box-shadow: 0 0 0 1px #8fb9a3 inset; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                  <span style="font-family: Fraunces, Georgia, serif; font-size: 34px; line-height: 38px; font-weight: 600">{{p.n}}</span>
+                  <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #bcd2c5">{{p.sub}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 760px">
+          <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #bcd2c5">COLUMNS</div>
+          <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px">
+            <sc-for list="{{tabs}}" as="p" hint-placeholder-count="8">
+              <div style="height: 120px; box-sizing: border-box; border-radius: 6px; background: #17462f; box-shadow: 0 0 0 1px #8fb9a3 inset; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+                <span style="font-family: Fraunces, Georgia, serif; font-size: 34px; line-height: 38px; font-weight: 600">{{p.n}}</span>
+                <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #bcd2c5">{{p.sub}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: #5b605c">Foundations get four positions (one per suit) even though the target is implied by the card’s suit. That keeps the map a clean 16, and because a foundation is never a move’s source, every byte that starts with 4–7 is free for control tokens.</p>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px">
+      <section aria-labelledby="move-h" style="flex: 1 1 480px; min-width: 0; background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 24px; display: flex; flex-direction: column; gap: 16px">
+        <h2 id="move-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">2 · A move is FROM then TO</h2>
+        <div style="display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap">
+          <div style="flex: 1 1 120px; border-radius: 10px; background: #1d1f1e; color: #f4efe3; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #a3a89f">FROM · 4 BITS</span>
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 32px; line-height: 38px; font-weight: 600">D</span>
+            <span style="font-size: 13px; color: #a3a89f">column 6</span>
+          </div>
+          <div style="flex: 1 1 120px; border-radius: 10px; background: #1d1f1e; color: #f4efe3; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #a3a89f">TO · 4 BITS</span>
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 32px; line-height: 38px; font-weight: 600">0</span>
+            <span style="font-size: 13px; color: #a3a89f">cell a</span>
+          </div>
+          <div style="flex: 1 1 120px; border-radius: 10px; border: 2px dashed #7f847d; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">DEPTH · ONLY SOMETIMES</span>
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 32px; line-height: 38px; font-weight: 600; color: #5b605c">—</span>
+            <span style="font-size: 13px; color: #5b605c">cards − 1</span>
+          </div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 20px">6a · 9♠ to a free cell → <strong>0xD0</strong></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 22px">
+          <div style="font-weight: 600">When is depth needed?</div>
+          <div>The rules already fix how many cards move in every case but one:</div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; font-size: 14px; line-height: 20px">
+            <span>To a cell or a foundation</span><span style="color: #5b605c">always 1 card</span>
+            <span>From a cell</span><span style="color: #5b605c">always 1 card</span>
+            <span>Onto a card in a column</span><span style="color: #5b605c">only one run length fits</span>
+            <span style="font-weight: 600">Column to an <em>empty</em> column</span><span style="font-weight: 600">add one nibble</span>
+          </div>
+          <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 20px">57 · 7♥ and 1 more to empty column 7 → <strong>C E 1</strong></div>
+          <div style="font-size: 14px; line-height: 20px; color: #5b605c">In the sample solve, 8 of 84 actions needed it. Moves are a stream of 4-bit nibbles, so depth costs half a byte, and a lone trailing 4 pads an odd stream.</div>
+        </div>
+      </section>
+
+      <section aria-labelledby="ctl-h" style="flex: 1 1 480px; min-width: 0; background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 24px; display: flex; flex-direction: column; gap: 16px">
+        <h2 id="ctl-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">3 · Control tokens live in the 4–7 rows</h2>
+        <div style="display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0; font-size: 15px; line-height: 22px; border-top: 1px solid #e2dccf">
+          <sc-for list="{{controls}}" as="c" hint-placeholder-count="5">
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; padding: 10px 20px 10px 0; border-bottom: 1px solid #e2dccf">{{c.hex}}</span>
+            <span style="padding: 10px 0; border-bottom: 1px solid #e2dccf">{{c.text}}</span>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 22px">
+          <div style="font-weight: 600">Auto-moves aren’t stored</div>
+          <div style="color: #5b605c">The header says which auto-move setting was on (off, safe, always). The replayer runs the same engine after each move, so the 33 cards that went home by themselves in this solve cost nothing. The version byte pins the auto-move rules, so an old code still plays back if those rules change later.</div>
+        </div>
+      </section>
+    </div>
+
+    <section aria-labelledby="hdr-h" style="background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 24px; display: flex; flex-direction: column; gap: 16px">
+      <h2 id="hdr-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">4 · The whole code</h2>
+      <div style="display: flex; gap: 4px; flex-wrap: wrap; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 18px">
+        <sc-for list="{{layout}}" as="b" hint-placeholder-count="6">
+          <div style="{{b.css}}">
+            <span style="font-weight: 600; font-size: 15px">{{b.hex}}</span>
+            <span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 12px; line-height: 16px">{{b.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+        <sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+          <div style="background: #f6f2e8; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">{{s.label}}</span>
+            <span style="font-size: 26px; line-height: 32px; font-weight: 600; font-variant-numeric: tabular-nums">{{s.value}}</span>
+            <span style="font-size: 13px; line-height: 18px; color: #5b605c">{{s.note}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">THE REAL LINK FOR THIS SOLVE</div>
+        <div style="padding: 12px 14px; border-radius: 10px; background: #1d1f1e; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 20px; overflow-wrap: anywhere">mikhaidn.github.io/TheParlor/daily/?ref=replay#r=AQYAAAIAxtbQrKyBiY5ACKmg2tK9C97Y1A4-pADo3q4Osrzh6r4eqyvgK0C896eX6iyfy_2NuJyUqUCkqUDUhAmJG5s5oKfHoaeHgp9A09SfmAlSWytMkM4MXOFZX5Lj</div>
+        <div style="font-size: 14px; line-height: 20px; color: #5b605c">Base64url after the <span style="font-family: 'JetBrains Mono', ui-monospace, monospace">#</span>, so it never reaches a server log. It reads as noise, so nobody spots the line by glancing at it.</div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px">
+      <section aria-labelledby="ex-h" style="flex: 1 1 520px; min-width: 0; background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 24px; display: flex; flex-direction: column; gap: 12px">
+        <h2 id="ex-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">5 · The first eight actions</h2>
+        <div style="overflow-x: auto">
+          <div style="display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; min-width: 460px; font-size: 14px; line-height: 20px">
+            <span style="padding: 6px 12px 6px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c; border-bottom: 1px solid #e2dccf">#</span>
+            <span style="padding: 6px 12px 6px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c; border-bottom: 1px solid #e2dccf">MOVE</span>
+            <span style="padding: 6px 12px 6px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c; border-bottom: 1px solid #e2dccf">WHAT HAPPENED</span>
+            <span style="padding: 6px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c; border-bottom: 1px solid #e2dccf; text-align: right">BYTE</span>
+            <sc-for list="{{example}}" as="r" hint-placeholder-count="8">
+              <span style="padding: 8px 12px 8px 0; border-bottom: 1px solid #f0ebe0; color: #5b605c; font-variant-numeric: tabular-nums">{{r.i}}</span>
+              <span style="padding: 8px 12px 8px 0; border-bottom: 1px solid #f0ebe0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; {{r.css}}">{{r.n}}</span>
+              <span style="padding: 8px 12px 8px 0; border-bottom: 1px solid #f0ebe0">{{r.d}}</span>
+              <span style="padding: 8px 0; border-bottom: 1px solid #f0ebe0; font-family: 'JetBrains Mono', ui-monospace, monospace; text-align: right; {{r.css}}">{{r.hex}}</span>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="count-h" style="flex: 1 1 420px; min-width: 0; background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="count-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">6 · What counts as a move</h2>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-variant-numeric: tabular-nums">
+          <div style="display: flex; flex-direction: column; align-items: center; padding: 10px 14px; border-radius: 10px; background: #f6f2e8"><span style="font-size: 26px; line-height: 30px; font-weight: 600">70</span><span style="font-size: 12px; color: #5b605c">your moves</span></div>
+          <span style="font-size: 22px; color: #5b605c">+</span>
+          <div style="display: flex; flex-direction: column; align-items: center; padding: 10px 14px; border-radius: 10px; background: #f6f2e8"><span style="font-size: 26px; line-height: 30px; font-weight: 600">33</span><span style="font-size: 12px; color: #5b605c">auto-home</span></div>
+          <span style="font-size: 22px; color: #5b605c">=</span>
+          <div style="display: flex; flex-direction: column; align-items: center; padding: 10px 14px; border-radius: 10px; background: #1f5b43; color: #f4efe3"><span style="font-size: 26px; line-height: 30px; font-weight: 600">103</span><span style="font-size: 12px; color: #bcd2c5">moves</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 22px">
+          <div>Every card move on the board when you win counts, including cards that went home by themselves. <strong>Undo, hints and restarting are free</strong>: an undo takes its move off the count, and a restart clears the count, but the clock keeps running.</div>
+          <div>That’s what the app counts today, so Best-moves stats stay valid. The code still records every undo and restart, so the replay can show the solve <strong>as played</strong> (84 steps), wrong turns and all.</div>
+          <div style="color: #5b605c">Casual dailies work this way: NYT puzzles have no move penalty, and only help like Check or Reveal costs the streak. Score-chasing solitaire sites charge a move per undo instead.</div>
+        </div>
+      </section>
+    </div>
+
+    <section aria-labelledby="spoil-h" style="background: #1f5b43; color: #f4efe3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+      <h2 id="spoil-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; line-height: 30px; font-weight: 600">7 · Locked in, and shared without spoilers</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px">
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 16px">Locked in at the win</span><span style="font-size: 15px; line-height: 22px; color: #bcd2c5">The first solve is the record: time, moves and this code are saved the moment the last card goes home. Playing the deal again is practice and never changes it.</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 16px">The squares stay as they are</span><span style="font-size: 15px; line-height: 22px; color: #bcd2c5">The share text is unchanged. The replay link is a separate, opt-in line or QR.</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 16px">The code reads as noise</span><span style="font-size: 15px; line-height: 22px; color: #bcd2c5">No move can be read off it by eye. It sits after the #, so it never reaches a server.</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 16px">Solve it, or give up the streak</span><span style="font-size: 15px; line-height: 22px; color: #bcd2c5">If you haven’t solved that Daily, a replay shows only the result, face down. Watching anyway means that day can’t count toward your streak, like Reveal in the NYT Crossword.</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = (n) => n.toString(16).toUpperCase();
+    const cells = [0, 1, 2, 3].map((n) => ({ n, sub: '0x' + hex(n) + ' · ' + 'abcd'[n] }));
+    const founds = ['♠', '♥', '♦', '♣'].map((s, i) => ({ n: i + 4, sub: '0x' + hex(i + 4) + ' · h' + s }));
+    const tabs = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ n: i + 8, sub: '0x' + hex(i + 8) + ' · ' + (i + 1) }));
+    const controls = [
+      { hex: '40', text: 'Undo: take back the last move (and the auto-moves that followed it)' },
+      { hex: '41–43', text: 'Auto-move setting changed mid-game: off, safe, always' },
+      { hex: '44', text: 'Hint shown (reserved, so a replay can mark where help was used)' },
+      { hex: '45', text: 'Restart: back to the first layout. An undo straight after brings the game back' },
+      { hex: '46–7F', text: 'Reserved for later games and events' },
+      { hex: '4 (lone)', text: 'Pad nibble at the very end of an odd-length stream' },
+    ];
+    const layout = [
+      { hex: '01', label: 'version', tone: 'ink' },
+      { hex: '06', label: 'game · auto · daily', tone: 'ink' },
+      { hex: '00 00 02', label: 'Daily # (or deal #, up to 16 million)', tone: 'ink' },
+      { hex: '00 C6', label: 'time · 198 s', tone: 'ink' },
+      { hex: 'D6 D0 AC AC 81 89 8E 40 …', label: 'actions · 1 byte each, + depth nibbles', tone: 'felt' },
+      { hex: 'E3', label: 'CRC-8 check', tone: 'ink' },
+    ].map((b) => ({ ...b,
+      css: `display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 8px; ${b.tone === 'felt' ? 'flex: 1 1 280px; background: #1f5b43; color: #f4efe3' : 'background: #1d1f1e; color: #f4efe3'}` }));
+    const stats = [
+      { label: 'ACTIONS', value: '84', note: '77 card moves + 7 undos' },
+      { label: 'BYTES', value: '96', note: '7 header + 88 moves + 1 check' },
+      { label: 'CODE', value: '128 chars', note: 'the link is 185' },
+      { label: 'QR', value: '57 × 57', note: 'version 10, medium error correction' },
+    ];
+    const ex = [
+      ['6h', 'A♦ home: the table waits for your first move, so you tap it', 'D6'],
+      ['6a', '9♠ to a free cell, then A♣ goes home by itself', 'D0'],
+      ['35', '7♥ to column 5', 'AC'],
+      ['35', '6♣ to column 5, then A♥ goes home', 'AC'],
+      ['1b', 'K♦ to a free cell', '81'],
+      ['12', '6♦ to column 2', '89'],
+      ['17', '10♦ to column 7', '8E'],
+      ['undo', 'Takes back 17', '40'],
+    ];
+    const example = ex.map(([n, d, h], i) => ({ i: i + 1, n, d, hex: h, css: n === 'undo' ? 'color: #8c1d17' : 'color: #1d1f1e' }));
+    return { cells, founds, tabs, controls, layout, stats, example };
+  }
+}
+</script>
+</body>
+</html>

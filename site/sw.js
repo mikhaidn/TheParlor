@@ -39,6 +39,8 @@ const ASSETS = [
   "./js/freecell-page.js",
   "./js/launcher.js",
   "./js/pwa.js",
+  "./js/replay-code.js",
+  "./js/replay-view.js",
   "./js/share.js",
   "./js/stats-file.js",
   "./js/store.js",
@@ -47,7 +49,8 @@ const ASSETS = [
   "./manifest.webmanifest",
   "./parlor/bundle.css",
   "./parlor/bundle.js",
-  "./parlor/tokens.css"
+  "./parlor/tokens.css",
+  "./vendor/qrcode.js"
 ];
 // </build>
 

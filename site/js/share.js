@@ -106,3 +106,41 @@ export async function saveImage({ n, rec, streak, dateLabel, link }) {
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
   return 'downloaded';
 }
+
+// ---------- QR code for the replay link ----------
+// qrcode-generator (MIT, site/vendor/qrcode.js) is loaded the first time it's needed,
+// and the service worker caches it like everything else, so it works offline.
+let qrLib = null;
+function loadQr() {
+  if (window.qrcode) return Promise.resolve(window.qrcode);
+  if (!qrLib) {
+    qrLib = new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = new URL('../vendor/qrcode.js', import.meta.url).href;
+      s.onload = () => resolve(window.qrcode || null);
+      s.onerror = () => { qrLib = null; resolve(null); };
+      document.head.appendChild(s);
+    });
+  }
+  return qrLib;
+}
+
+/** An <svg> QR code for url (medium error correction), or null if it can't be drawn here. */
+export async function qrSvg(url, label) {
+  const qrcode = await loadQr();
+  if (!qrcode) return null;
+  let qr;
+  try { qr = qrcode(0, 'M'); qr.addData(url); qr.make(); } catch { return null; }
+  const n = qr.getModuleCount(), quiet = 2, size = n + quiet * 2;
+  let d = '';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (qr.isDark(y, x)) d += `M${x + quiet} ${y + quiet}h1v1h-1z`;
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  for (const [k, v] of Object.entries({ viewBox: `0 0 ${size} ${size}`, role: 'img', 'aria-label': label, 'shape-rendering': 'crispEdges', class: 'pd-qr' })) svg.setAttribute(k, v);
+  const bg = document.createElementNS(NS, 'rect');
+  for (const [k, v] of Object.entries({ width: size, height: size, fill: '#ffffff' })) bg.setAttribute(k, v);
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', d); path.setAttribute('fill', '#1d1f1e');
+  svg.append(bg, path);
+  return svg;
+}

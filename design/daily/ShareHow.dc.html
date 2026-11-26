@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share how I solved it</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #1f5b43; color: #f4efe3; font-family: 'Instrument Sans', system-ui, sans-serif">
+  <div aria-hidden="true" style="display: flex; flex-direction: column">
+    <div style="background: #17462f; display: flex; align-items: center; padding: 17px 20px">
+      <div style="font-family: Fraunces, Georgia, serif; font-size: 20px; line-height: 26px; font-weight: 600">FreeCell <span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; font-weight: 400; color: #bcd2c5">· Daily #2</span></div>
+    </div>
+    <div style="padding: 24px 20px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+      <div style="font-family: Fraunces, Georgia, serif; font-size: 44px; line-height: 48px; font-weight: 600">Solved!</div>
+    </div>
+  </div>
+  <div style="position: absolute; inset: 0; background: rgba(8,22,16,0.55); display: flex; flex-direction: column; justify-content: flex-end">
+    <section role="dialog" aria-modal="true" aria-labelledby="share-title" style="background: #ffffff; color: #1d1f1e; border-radius: 16px 16px 0 0; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <h2 id="share-title" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">Share result</h2>
+        <a href="CopyShare.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5b605c">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </a>
+      </div>
+
+      <div style="background: #f6f2e8; border: 1px solid #e2dccf; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 20px; font-variant-numeric: tabular-nums">
+        <div>Parlor Daily #2 · 3:18 · 102 moves</div>
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; gap: 3px">
+            <sc-for list="{{r}}" as="q" hint-placeholder-count="13">
+              <span style="width: 14px; height: 14px; border-radius: 3px; background: {{q}}"></span>
+            </sc-for>
+          </div>
+        </sc-for>
+        <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 18px; color: #5b605c; overflow-wrap: anywhere">Watch how: mikhaidn.github.io/TheParlor/daily/?ref=replay#r=AQYAAAIAxtbQ…</div>
+      </div>
+
+      <label style="display: flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer">
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">Add a replay link</span>
+          <span style="font-size: 13px; line-height: 18px; color: #5b605c">Friends who haven’t solved it only see the result, unless they give up that day’s streak.</span>
+        </span>
+        <input type="checkbox" checked="{{ true }}" style="width: 22px; height: 22px; accent-color: #1f5b43">
+      </label>
+
+      <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 0; border-radius: 10px; background: #d4ad55; color: #2a2110; font-size: 17px; font-weight: 600; cursor: pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h10v10H9zM5 15V5h10"></path></svg>
+        Copy text
+      </button>
+
+      <div style="display: flex; gap: 14px; align-items: center; border-top: 1px solid #e2dccf; padding-top: 14px">
+        <div style="flex: none; padding: 8px; border-radius: 8px; background: #ffffff; box-shadow: 0 0 0 1px #e2dccf"><svg width="148" height="148" viewBox="0 0 57 57" role="img" aria-label="QR code for the replay link" style="display: block; shape-rendering: crispEdges"><path stroke="#1d1f1e" stroke-width="1" fill="none" d="M0 0.5h7m3 0h1m2 0h1m3 0h1m5 0h3m2 0h3m4 0h9m2 0h2m2 0h7m-57 1h1m5 0h1m3 0h2m2 0h3m1 0h2m1 0h1m1 0h2m2 0h1m6 0h1m5 0h1m1 0h4m1 0h1m2 0h1m5 0h1m-57 1h1m1 0h3m1 0h1m1 0h2m2 0h4m1 0h3m2 0h1m3 0h1m1 0h1m2 0h1m2 0h4m2 0h3m1 0h4m2 0h1m1 0h3m1 0h1m-57 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m3 0h3m3 0h1m4 0h2m3 0h3m2 0h1m2 0h2m3 0h1m2 0h1m1 0h3m1 0h1m-57 1h1m1 0h3m1 0h1m1 0h6m2 0h1m2 0h2m2 0h2m1 0h6m5 0h1m2 0h4m1 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-57 1h1m5 0h1m1 0h1m2 0h1m1 0h1m2 0h6m2 0h1m1 0h1m3 0h1m2 0h2m1 0h1m1 0h2m2 0h1m1 0h1m1 0h1m3 0h1m5 0h1m-57 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-49 1h2m1 0h2m1 0h2m7 0h4m3 0h3m1 0h1m5 0h1m1 0h1m3 0h3m-49 1h1m1 0h5m3 0h2m3 0h1m2 0h1m1 0h2m3 0h6m2 0h5m1 0h1m1 0h2m4 0h1m2 0h5m-55 1h1m1 0h1m2 0h1m1 0h1m1 0h4m1 0h1m1 0h1m1 0h3m2 0h2m3 0h3m3 0h4m1 0h1m1 0h2m1 0h1m2 0h3m4 0h3m-57 1h1m1 0h2m1 0h2m1 0h1m1 0h2m5 0h1m1 0h1m2 0h5m1 0h3m2 0h1m5 0h2m3 0h4m1 0h2m2 0h1m-54 1h2m2 0h2m3 0h3m3 0h1m3 0h1m1 0h2m2 0h1m5 0h2m1 0h4m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m2 0h3m-55 1h2m1 0h2m1 0h3m2 0h4m3 0h1m1 0h1m1 0h1m1 0h2m2 0h1m3 0h1m1 0h1m1 0h1m3 0h2m1 0h1m2 0h1m4 0h1m1 0h2m-56 1h5m1 0h1m3 0h2m2 0h3m3 0h1m1 0h1m1 0h2m3 0h4m1 0h3m4 0h1m4 0h3m3 0h1m2 0h1m-51 1h4m1 0h1m2 0h1m2 0h1m1 0h3m4 0h2m1 0h1m3 0h2m1 0h4m2 0h1m1 0h3m1 0h1m2 0h1m3 0h1m-56 1h2m2 0h1m3 0h1m1 0h1m1 0h2m1 0h1m5 0h1m1 0h1m1 0h2m5 0h2m3 0h1m2 0h6m2 0h1m3 0h4m-56 1h3m2 0h2m3 0h1m2 0h2m2 0h1m2 0h1m1 0h3m4 0h3m3 0h3m4 0h1m6 0h3m1 0h1m2 0h1m-57 1h1m3 0h2m1 0h3m1 0h2m5 0h4m1 0h2m4 0h2m1 0h1m3 0h2m3 0h3m3 0h2m2 0h6m-56 1h2m1 0h1m1 0h3m3 0h2m2 0h1m1 0h2m2 0h1m1 0h1m1 0h3m1 0h1m3 0h1m3 0h3m4 0h1m2 0h3m3 0h2m-56 1h1m2 0h1m1 0h1m1 0h1m1 0h1m5 0h1m1 0h1m2 0h1m1 0h2m5 0h1m1 0h1m3 0h1m6 0h4m2 0h3m1 0h4m-56 1h7m2 0h5m1 0h1m1 0h4m1 0h2m2 0h1m4 0h1m1 0h5m1 0h1m1 0h2m6 0h1m4 0h1m1 0h1m-57 1h6m1 0h2m1 0h1m5 0h1m2 0h1m1 0h1m1 0h2m1 0h1m2 0h1m1 0h1m3 0h2m4 0h2m1 0h1m2 0h3m1 0h1m-52 1h2m1 0h1m1 0h2m2 0h3m2 0h2m1 0h5m3 0h2m3 0h2m1 0h2m1 0h2m1 0h1m1 0h2m4 0h1m1 0h3m2 0h2m-56 1h1m2 0h3m1 0h3m1 0h1m1 0h1m2 0h5m1 0h4m1 0h1m2 0h1m2 0h1m4 0h1m1 0h2m2 0h4m4 0h3m1 0h1m-57 1h3m3 0h6m1 0h4m1 0h1m3 0h2m2 0h1m2 0h4m2 0h2m4 0h1m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m-54 1h6m1 0h1m4 0h2m3 0h2m3 0h4m3 0h2m1 0h1m3 0h2m3 0h3m3 0h2m4 0h1m-54 1h2m1 0h6m3 0h2m1 0h5m1 0h2m2 0h14m2 0h1m5 0h7m1 0h1m-56 1h1m1 0h3m3 0h2m4 0h3m2 0h1m1 0h2m1 0h1m1 0h1m3 0h4m4 0h4m2 0h5m3 0h4m-55 1h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h4m2 0h1m1 0h1m5 0h1m1 0h1m1 0h2m3 0h3m3 0h3m3 0h2m1 0h1m1 0h2m2 0h1m-57 1h1m2 0h2m3 0h1m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h4m3 0h4m3 0h1m1 0h4m4 0h2m3 0h1m3 0h1m-57 1h12m1 0h3m1 0h4m1 0h10m3 0h1m3 0h2m1 0h5m1 0h7m-55 1h1m3 0h1m4 0h1m1 0h4m3 0h1m2 0h2m1 0h1m2 0h1m1 0h1m4 0h1m1 0h1m2 0h1m1 0h1m2 0h2m1 0h1m1 0h2m1 0h1m1 0h2m-56 1h1m1 0h2m2 0h2m1 0h1m2 0h4m7 0h6m2 0h1m2 0h2m2 0h1m4 0h1m9 0h1m2 0h1m-57 1h1m2 0h1m3 0h1m1 0h4m2 0h2m3 0h3m1 0h1m4 0h2m10 0h1m1 0h1m3 0h3m3 0h4m-56 1h3m2 0h1m2 0h3m2 0h1m1 0h2m4 0h6m2 0h1m4 0h1m1 0h3m2 0h2m2 0h1m2 0h1m3 0h2m1 0h1m-56 1h1m2 0h1m2 0h1m2 0h1m2 0h1m3 0h1m2 0h3m1 0h1m3 0h2m3 0h1m2 0h6m1 0h2m2 0h1m1 0h1m1 0h4m-55 1h1m2 0h5m1 0h1m3 0h1m4 0h2m1 0h2m4 0h1m3 0h1m1 0h6m4 0h1m1 0h1m3 0h2m1 0h1m1 0h1m-55 1h1m1 0h3m5 0h2m2 0h1m1 0h1m3 0h5m1 0h1m1 0h4m5 0h1m2 0h1m1 0h3m4 0h1m1 0h1m1 0h1m1 0h2m-57 1h1m1 0h1m3 0h1m2 0h1m4 0h1m1 0h3m1 0h1m1 0h3m2 0h2m1 0h1m1 0h2m1 0h2m8 0h3m1 0h1m3 0h3m-55 1h3m3 0h2m2 0h1m2 0h2m6 0h1m1 0h3m1 0h2m2 0h1m2 0h1m1 0h3m2 0h3m2 0h1m1 0h1m1 0h6m-54 1h1m2 0h2m1 0h1m2 0h1m2 0h4m2 0h2m2 0h2m1 0h1m1 0h2m2 0h3m1 0h1m1 0h4m6 0h3m2 0h1m-56 1h3m1 0h2m4 0h2m3 0h4m4 0h2m1 0h2m1 0h2m4 0h10m5 0h1m2 0h4m-57 1h1m1 0h5m2 0h1m2 0h1m1 0h1m3 0h2m1 0h7m2 0h1m1 0h2m1 0h2m3 0h3m2 0h1m2 0h1m5 0h1m-53 1h2m3 0h1m1 0h1m1 0h1m2 0h1m4 0h4m2 0h1m1 0h1m1 0h1m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m1 0h5m1 0h1m2 0h4m-57 1h1m2 0h5m2 0h1m2 0h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h3m1 0h1m4 0h3m1 0h1m1 0h1m1 0h1m1 0h1m6 0h2m1 0h2m-53 1h2m3 0h1m1 0h2m2 0h2m2 0h1m4 0h1m1 0h1m2 0h3m4 0h2m2 0h3m2 0h1m1 0h1m2 0h1m3 0h3m-57 1h1m1 0h1m2 0h2m4 0h2m1 0h2m1 0h2m1 0h4m1 0h4m1 0h1m2 0h1m4 0h1m2 0h1m2 0h1m1 0h4m1 0h1m-52 1h5m2 0h3m2 0h2m3 0h2m2 0h5m3 0h2m1 0h1m1 0h1m5 0h1m4 0h2m3 0h1m2 0h4m-51 1h1m1 0h1m3 0h1m1 0h1m1 0h1m2 0h2m1 0h1m3 0h6m1 0h2m1 0h2m5 0h1m2 0h1m1 0h5m3 0h1m-49 1h1m3 0h1m1 0h5m4 0h2m1 0h1m3 0h1m3 0h1m2 0h1m1 0h5m4 0h1m3 0h5m-57 1h7m2 0h2m1 0h2m2 0h3m2 0h1m2 0h3m1 0h1m1 0h1m1 0h2m2 0h4m2 0h2m1 0h2m1 0h1m1 0h1m1 0h2m1 0h1m-56 1h1m5 0h1m1 0h2m1 0h1m1 0h3m3 0h1m1 0h1m1 0h2m1 0h1m3 0h3m2 0h3m1 0h1m2 0h2m1 0h2m1 0h1m3 0h3m-55 1h1m1 0h3m1 0h1m1 0h1m3 0h5m1 0h1m3 0h1m1 0h7m2 0h1m2 0h1m4 0h3m3 0h10m-57 1h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h1m4 0h2m1 0h1m1 0h3m2 0h3m2 0h3m4 0h1m2 0h1m2 0h2m1 0h1m-52 1h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h3m3 0h1m5 0h2m5 0h3m1 0h1m1 0h6m1 0h4m-49 1h1m5 0h1m2 0h1m1 0h2m1 0h2m1 0h1m1 0h1m2 0h2m1 0h1m3 0h6m3 0h4m1 0h2m1 0h3m3 0h3m-55 1h7m1 0h1m1 0h1m6 0h2m1 0h3m1 0h2m5 0h1m2 0h5m7 0h3m1 0h4m1 0h1"></path></svg></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+          <div style="font-size: 15px; line-height: 20px; font-weight: 600">Show it in person</div>
+          <div style="font-size: 13px; line-height: 18px; color: #5b605c">Scan to open the replay. Same link, same spoiler check.</div>
+          <a href="ReplayGate.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 10px; border: 1px solid #7f847d; font-size: 15px; font-weight: 600; text-decoration: none">Open the replay</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const C = ['#4c9a5c', '#e6c344', '#e48a3a', '#c9473d'];
+    const q = [[0,0,0,1,1,1,2,2,3,3,3,3,3],[0,0,1,1,1,2,2,2,2,3,3,3,3],[0,1,1,1,2,2,2,3,3,3,3,3,3],[0,0,0,0,1,1,2,2,2,3,3,3,3]];
+    return { rows: q.map((r) => r.map((x) => C[x])) };
+  }
+}
+</script>
+</body>
+</html>

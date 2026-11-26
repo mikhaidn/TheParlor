@@ -43,3 +43,33 @@ export function solve(P, deal, { rulesId = 'parlor.rules.freecell', limit = 2000
   }
   return null;
 }
+
+/**
+ * A solution as a player makes it at the table. The solver sends cards home before its first
+ * move; the table waits for the first move. So this taps those cards home first, then makes each
+ * solver move by the card it moves (indices can differ while those cards are still out).
+ * Returns [{ from, index, to }] player moves (no auto-moves), or null if there's no solution.
+ */
+export function tableSolution(P, deal, opts = {}) {
+  const rulesId = opts.rulesId || 'parlor.rules.freecell';
+  const sol = solve(P, deal, opts);
+  if (!sol) return null;
+  const E = createEngine(P, rulesId);
+  const settle = (s) => { for (let a = E.nextAuto(s, 'safe'); a; a = E.nextAuto(s, 'safe')) s = E.apply(s, a); return s; };
+  let sv = settle(E.initial(deal)), tb = E.initial(deal);
+  const out = [];
+  for (let a = E.nextAuto(tb, 'safe'); a; a = E.nextAuto(tb, 'safe')) {
+    const mv = { from: a.from, index: a.index, to: a.to };
+    out.push(mv); tb = settle(E.apply(tb, mv));
+  }
+  for (const m of sol.moves.filter((x) => !x.auto)) {
+    const id = cardId(E.pile(sv, m.from)[m.index]);
+    const index = E.pile(tb, m.from).findIndex((c) => cardId(c) === id);
+    const r = E.check(tb, m.from, index, m.to);
+    if (index < 0 || !r.ok) return null;
+    const mv = { from: m.from, index, to: r.to };
+    out.push(mv); tb = settle(E.apply(tb, mv));
+    sv = settle(E.apply(sv, m));
+  }
+  return E.isWon(tb) ? out : null;
+}

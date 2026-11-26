@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Restart the deal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #1f5b43; color: #f4efe3; font-family: 'Instrument Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <div style="display: flex; align-items: center; gap: 12px; margin: 12px 12px 0; padding: 6px 6px 6px 12px; border-radius: 10px; background: #17462f">
+    <div style="display: flex; flex-direction: column">
+      <span style="font-family: Fraunces, Georgia, serif; font-size: 18px; line-height: 22px; font-weight: 600">FreeCell</span>
+      <span style="font-size: 12px; line-height: 16px; color: #bcd2c5">Daily #2</span>
+    </div>
+    <div style="display: flex; gap: 12px; margin-left: auto; font-variant-numeric: tabular-nums">
+      <div style="display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06em; color: #bcd2c5">MOVES</span><span style="font-size: 15px; line-height: 20px; font-weight: 600">{{moves}}</span></div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06em; color: #bcd2c5">TIME</span><span style="font-size: 15px; line-height: 20px; font-weight: 600">1:42</span></div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; padding: 12px 12px 0">
+    <sc-for list="{{top}}" as="p" hint-placeholder-count="8">
+      <div style="position: relative; height: 57px; border-radius: 4px; background: #17462f; box-shadow: 0 0 0 1px #8fb9a3 inset">
+        <sc-for list="{{p.cards}}" as="c" hint-placeholder-count="1">
+          <div style="{{c.css}}"><span style="{{c.idxCss}}">{{c.rank}}<svg width="9" height="9" viewBox="0 0 24 24" fill="{{c.ink}}" aria-hidden="true"><path d="{{c.d}}"></path></svg></span></div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; padding: 12px 12px 0; height: 300px">
+    <sc-for list="{{cols}}" as="p" hint-placeholder-count="8">
+      <div style="position: relative">
+        <div style="position: absolute; left: 0; right: 0; top: 0; height: 57px; border-radius: 4px; background: #17462f; box-shadow: 0 0 0 1px #8fb9a3 inset"></div>
+        <sc-for list="{{p.cards}}" as="c" hint-placeholder-count="6">
+          <div style="{{c.css}}"><span style="{{c.idxCss}}">{{c.rank}}<svg width="9" height="9" viewBox="0 0 24 24" fill="{{c.ink}}" aria-hidden="true"><path d="{{c.d}}"></path></svg></span></div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: absolute; left: 16px; right: 16px; bottom: 96px; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 10px; background: #1d1f1e; color: #f4efe3; box-shadow: 0 10px 22px rgba(0,0,0,0.38)">
+      <span style="font-size: 15px; line-height: 20px; flex-grow: 1">Deal restarted. The clock keeps running.</span>
+      <button type="button" onClick="{{undoRestart}}" style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: #d4ad55; font-size: 15px; font-weight: 600; cursor: pointer">Undo</button>
+    </div>
+  </sc-if>
+
+  <div style="margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 12px 12px 20px">
+    <button type="button" onClick="{{undo}}" style="min-height: 52px; border: 0; border-radius: 10px; background: #17462f; color: #f4efe3; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg>
+      Undo
+    </button>
+    <button type="button" style="min-height: 52px; border: 0; border-radius: 10px; background: #17462f; color: #f4efe3; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"></path></svg>
+      Hint
+    </button>
+    <button type="button" onClick="{{openMenu}}" style="min-height: 52px; border: 0; border-radius: 10px; background: #17462f; color: #f4efe3; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      Menu
+    </button>
+  </div>
+
+  <sc-if value="{{menuOpen}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; background: rgba(8,22,16,0.55); display: flex; flex-direction: column; justify-content: flex-end">
+      <section role="dialog" aria-modal="true" aria-labelledby="menu-title" style="background: #ffffff; color: #1d1f1e; border-radius: 16px 16px 0 0; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <h2 id="menu-title" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">Menu</h2>
+          <button type="button" aria-label="Close" onClick="{{closeMenu}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #5b605c; display: flex; align-items: center; justify-content: center; cursor: pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <button type="button" onClick="{{restart}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; border: 1px solid #7f847d; border-radius: 10px; background: transparent; color: #1d1f1e; text-align: left; cursor: pointer">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+          <span style="display: flex; flex-direction: column">
+            <span style="font-size: 16px; line-height: 22px; font-weight: 600">Restart deal</span>
+            <span style="font-size: 13px; line-height: 18px; color: #5b605c">Back to the first layout. Streak and clock carry on.</span>
+          </span>
+        </button>
+        <button type="button" style="min-height: 48px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: #1d1f1e; font-size: 16px; font-weight: 600; text-align: left; cursor: pointer">Back to Today</button>
+        <button type="button" style="min-height: 48px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: #1d1f1e; font-size: 16px; font-weight: 600; text-align: left; cursor: pointer">How to play</button>
+        <button type="button" style="min-height: 48px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: #1d1f1e; font-size: 16px; font-weight: 600; text-align: left; cursor: pointer">Settings</button>
+      </section>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { view: 'menu' };
+  }
+  renderVals() {
+    const MID = 'Jh|Kd|6s|Js|2s|2h|Ad|Ac|5h9cTc5s|4h4dQdQs3s7c7s6d5c|JdTs9d8c7h6c5d4c|9h2c7d|2dQc6hKh8h8s|KcQhJcTd9s|4s|Th3dKs8d3h3c', START = '||||||Ad||5h9cTc5sTd6dKd|4h4dQdQs3s7c7s|JdAs8c5cAh6c7h|9h2c7d4s6sQhKc|2dQc6hKh8h8s|2h4cTsAc9s|5dJh9d2sJsJc|Th3dKs8d3h3c';
+    const v = this.state.view, restarted = v === 'restarted';
+    const SUIT = {
+      h: 'M12 21s-7.5-4.6-9.6-9.1C.9 8.6 2.9 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.7 0 5.7 4.1 4.2 7.4C19.5 16.4 12 21 12 21z',
+      s: 'M12 2s-8 6-8 11a4 4 0 0 0 7 2.6V18l-2 3h6l-2-3v-2.4A4 4 0 0 0 20 13c0-5-8-11-8-11z',
+      d: 'M12 2l8 10-8 10-8-10z',
+      c: 'M12 3a3.8 3.8 0 0 1 3.6 5A3.8 3.8 0 1 1 13.4 15l1.1 6h-5l1.1-6a3.8 3.8 0 1 1-2.2-7A3.8 3.8 0 0 1 12 3z',
+    };
+    const RED = { h: 1, d: 1 };
+    const cardsOf = (str, fan) => {
+      const out = [];
+      for (let i = 0; i < str.length; i += 2) {
+        const r = str[i], su = str[i + 1], k = i / 2, ink = RED[su] ? '#b3261e' : '#1d1f1e';
+        out.push({ rank: r === 'T' ? '10' : r, d: SUIT[su], ink,
+          css: `position: absolute; left: 0; right: 0; top: ${k * fan}px; height: 57px; box-sizing: border-box; border-radius: 4px; background: #fbf7ec; box-shadow: 0 0 0 1px #d6ccb6 inset, 0 1px 2px rgba(0,0,0,0.28); z-index: ${k + 1}`,
+          idxCss: `position: absolute; left: 3px; right: 2px; top: 3px; display: flex; align-items: center; justify-content: space-between; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 13px; line-height: 13px; color: ${ink}` });
+      }
+      return out;
+    };
+    const piles = (restarted ? START : MID).split('|');
+    return {
+      top: piles.slice(0, 8).map((p) => ({ cards: cardsOf(p, 0) })),
+      cols: piles.slice(8).map((p) => ({ cards: cardsOf(p, 17) })),
+      moves: restarted ? 0 : 31,
+      menuOpen: v === 'menu', showToast: restarted,
+      openMenu: () => this.setState({ view: 'menu' }),
+      closeMenu: () => this.setState({ view: 'mid' }),
+      restart: () => this.setState({ view: 'restarted' }),
+      undoRestart: () => this.setState({ view: 'mid' }),
+      undo: () => { if (restarted) this.setState({ view: 'mid' }); },
+    };
+  }
+}
+</script>
+</body>
+</html>

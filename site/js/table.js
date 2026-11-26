@@ -12,13 +12,15 @@ import { createEngine } from './engine.js';
 import { read, write, remove, formatTime } from './store.js';
 import { P, getSettings, setSettings } from './boot.js';
 import { statsGroup } from './stats-file.js';
-import { t } from './strings.js';
+import { t, dsText, localize } from './strings.js';
+import { encode as encodeReplay } from './replay-code.js';
 
 const DRAG_THRESHOLD = 6;
 const DOUBLE_TAP_MS = 400;
 
 let toastEl, toastTimer;
-export function toast(msg) {
+/** A short message at the bottom of the screen. action: { label, onClick } adds a button (e.g. Undo). */
+export function toast(msg, action) {
   if (!toastEl) {
     toastEl = document.createElement('div');
     toastEl.className = 'pa-toast';
@@ -26,10 +28,25 @@ export function toast(msg) {
     toastEl.setAttribute('aria-live', 'polite');
     document.body.appendChild(toastEl);
   }
-  toastEl.textContent = msg;
+  const text = document.createElement('span');
+  text.textContent = msg;
+  toastEl.replaceChildren(text);
+  toastEl.classList.toggle('has-action', !!action);
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pa-toast-action'; b.textContent = action.label;
+    b.addEventListener('click', () => { hideToast(); action.onClick(); });
+    toastEl.appendChild(b);
+  }
   toastEl.classList.add('is-on');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('is-on'), 2200);
+  toastTimer = setTimeout(hideToast, action ? 5000 : 2200);
+}
+export function hideToast() {
+  if (!toastEl) return;
+  toastEl.classList.remove('is-on');
+  toastEl.querySelector('.pa-toast-action')?.remove(); // a hidden toast must not leave a second "Undo" around
+  clearTimeout(toastTimer);
 }
 
 function btn(label, onClick, variant = 'quiet') { return P.Button({ label, variant, onClick }); }
@@ -39,7 +56,16 @@ export function menuSheet(title, items) {
   let close;
   const list = document.createElement('div');
   list.className = 'pa-menu';
-  items.filter(Boolean).forEach((it) => list.appendChild(btn(it.label, () => { close(); it.onClick(); }, it.primary ? 'primary' : 'quiet')));
+  items.filter(Boolean).forEach((it) => {
+    const b = btn(it.label, () => { close(); it.onClick(); }, it.primary ? 'primary' : 'quiet');
+    if (it.help) {
+      const title = document.createElement('span'), sub = document.createElement('span');
+      title.textContent = it.label;
+      sub.className = 'pa-menu-sub'; sub.textContent = it.help;
+      b.classList.add('pa-menu-rich'); b.replaceChildren(title, sub);
+    }
+    list.appendChild(b);
+  });
   const sheet = P.Sheet({ title, children: [list], onClose: () => close() });
   close = P.openSheet(sheet);
   return close;
@@ -52,14 +78,12 @@ export function openSettings(onChange) {
     onChange: (next) => { setSettings(next); onChange && onChange(); },
     onClose: () => close(),
   });
-  // The design system's own help text, overridden from copy/en.json.
-  const help = panel.querySelector('.pl-set-file .pl-set-help');
-  if (help) help.textContent = t('designSystem.settingsFileHelp');
   panel.querySelector('.pl-sheet-body')?.appendChild(statsGroup(P));
   close = P.openSheet(panel);
 }
 
 export function openRules(game = 'freecell') {
+  // The rules sheet's text is the design system's; strings.js translates it as the sheet opens.
   let close;
   close = P.openSheet(P.RulesSheet({ game, onClose: () => close() }));
 }
@@ -69,11 +93,19 @@ export function openRules(game = 'freecell') {
  * @param {object} o
  *   rulesId, deal, title, dealLabel, storageKey, resume,
  *   onStart(), onWin(result), onLeave(), menu(ctl) → [{label,onClick}], onNewGame()
+ *   daily: Daily number, written into the replay code (null for numbered deals)
+ *   restartInMenu: show "Restart deal" (undoable, clock keeps running) first in the menu
+ *   startLog: an action log to play out on load (Play from here in a replay)
+ *
+ * Besides moves[] (what's on the board, auto-moves included), the table keeps an
+ * append-only action log for the replay code (site/js/replay-code.js):
+ *   { m: [from, index, to] } a player move · 'u' undo · 'r' restart · { a: mode } auto-move setting changed
  */
 export function mountGame(host, o) {
   let engine = createEngine(P, o.rulesId);
   let deal = o.deal;
   let moves = [], undos = 0, elapsed = 0, runningSince = null, won = false;
+  let log = [], restarts = [], mode0 = null, mode = null;
   let state, selection = null, hint = null, hintTimer = null;
   let press = null, lastTap = { t: 0, pid: null };
   let timeEl = null, tick = null, focusPid = null;
@@ -84,13 +116,19 @@ export function mountGame(host, o) {
   function now() { return elapsed + (runningSince ? performance.now() - runningSince : 0); }
   function save() {
     if (!o.storageKey) return;
-    write(o.storageKey, { v: 1, rulesId: engine.rulesId, deal, moves, undos, elapsed: now(), won });
+    write(o.storageKey, { v: 1, rulesId: engine.rulesId, deal, moves, undos, elapsed: now(), won, log, restarts, mode0, mode });
   }
   function load() {
     const saved = o.resume !== false && o.storageKey ? read(o.storageKey) : null;
     if (saved && saved.v === 1 && saved.deal === deal && saved.rulesId === engine.rulesId && !saved.won) {
       moves = saved.moves || []; undos = saved.undos || 0; elapsed = saved.elapsed || 0;
+      restarts = saved.restarts || [];
+      // Saves from before the action log: the moves on the board are the whole story.
+      log = saved.log || moves.filter((m) => !m.auto).map((m) => ({ m: [m.from, m.index, m.to] }));
+      mode0 = saved.mode0 || (moves.length ? getSettings().play.autoMove : null);
+      mode = saved.mode || mode0;
     }
+    if (!moves.length && o.startLog) playLog(o.startLog);
     state = engine.replay(deal, moves).state;
     if (moves.length && document.visibilityState === 'visible') startClock();
   }
@@ -157,7 +195,7 @@ export function mountGame(host, o) {
     if (s.play.showTimer) stats.push({ label: t('common.time'), value: formatTime(now()) });
     if (s.play.showMoves) stats.push({ label: t('common.moves'), value: moves.length });
     const actions = [
-      { label: t('common.undo'), onClick: undo, disabled: !moves.length || won },
+      { label: t('common.undo'), onClick: undo, disabled: (!moves.length && !restarts.length) || won },
       s.play.hints ? { label: t('common.hint'), onClick: showHint, disabled: won } : null,
       { label: t('common.menu'), onClick: openMenu },
     ].filter(Boolean);
@@ -172,13 +210,14 @@ export function mountGame(host, o) {
       bar: { game: o.title || engine.name, deal: o.dealLabel || t('table.dealLabel', { deal }), stats, actions },
     });
     host.replaceChildren(table);
+    localize(table);
     timeEl = null;
     table.querySelectorAll('.pl-stat').forEach((st) => {
       if (st.querySelector('.pl-stat-label')?.textContent === t('common.time')) timeEl = st.querySelector('.pl-stat-value');
     });
     table.querySelectorAll('[data-pile]').forEach((el) => {
       el.tabIndex = 0;
-      if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.dataset.pile.replace('.', ' ').replace(/(\d+)$/, (n) => +n + 1));
+      if (!el.getAttribute('aria-label')) { const [z, i] = el.dataset.pile.split('.'); el.setAttribute('aria-label', t('table.pile.' + z, { n: +i + 1 })); }
     });
     if (focusPid) host.querySelector(`[data-pile="${focusPid}"]`)?.focus({ preventScroll: true });
     animateFrom(rects);
@@ -187,10 +226,13 @@ export function mountGame(host, o) {
   // ---------- moves ----------
   function commit(m, preRects) {
     const rects = preRects || snapshotRects();
-    if (!moves.length) { startClock(); o.onStart && o.onStart(); }
+    if (!moves.length && !log.length) { startClock(); o.onStart && o.onStart(); }
+    const current = getSettings().play.autoMove;
+    if (mode0 == null) mode0 = mode = current;
+    else if (current !== mode) { log.push({ a: current }); mode = current; }
+    log.push({ m: [m.from, m.index, m.to] });
     moves.push({ from: m.from, index: m.index, to: m.to });
     state = engine.apply(state, m);
-    const mode = getSettings().play.autoMove;
     for (let a = engine.nextAuto(state, mode); a; a = engine.nextAuto(state, mode)) {
       moves.push(a); state = engine.apply(state, a);
     }
@@ -208,7 +250,7 @@ export function mountGame(host, o) {
       const p = engine.pile(state, from);
       let last;
       for (let i = index; i < p.length; i++) { last = engine.check(state, from, i, to); if (last.ok) { commit({ from, index: i, to: last.to }); return last; } }
-      return last || { ok: false, reason: 'Nothing to move.' };
+      return last || { ok: false, reason: t('table.nothingToMove') };
     }
     const r = engine.check(state, from, index, to);
     if (r.ok) commit({ from, index, to: r.to });
@@ -224,14 +266,54 @@ export function mountGame(host, o) {
   }
 
   function undo() {
-    if (!moves.length || won) return;
-    while (moves.length && moves[moves.length - 1].auto) moves.pop();
-    moves.pop();
+    if (won) return;
+    if (!moves.length) {
+      // Straight after a restart, undo brings the game back.
+      if (!restarts.length) return;
+      moves = restarts.pop();
+    } else {
+      while (moves.length && moves[moves.length - 1].auto) moves.pop();
+      moves.pop();
+    }
     undos++;
+    log.push('u');
     const rects = snapshotRects();
     state = engine.replay(deal, moves).state;
     selection = null; clearHint();
     save(); render(rects);
+  }
+
+  /** Back to the first layout. The clock keeps running and the streak isn't touched; undo brings the game back. */
+  function restartDeal() {
+    if (won || !moves.length) return;
+    const rects = snapshotRects();
+    restarts.push(moves);
+    moves = [];
+    log.push('r');
+    state = engine.initial(deal);
+    selection = null; clearHint();
+    save(); render(rects);
+    toast(t('table.restarted'), { label: t('table.restartUndo'), onClick: undo });
+  }
+
+  /** Play out an action log (from a replay) to start practice from that point. */
+  function playLog(entries) {
+    let md = getSettings().play.autoMove;
+    let s = engine.initial(deal);
+    for (const a of entries) {
+      if (a === 'u') {
+        if (moves.length) { while (moves.length && moves[moves.length - 1].auto) moves.pop(); moves.pop(); }
+        else if (restarts.length) moves = restarts.pop();
+        s = engine.replay(deal, moves).state;
+      } else if (a === 'r') { if (moves.length) { restarts.push(moves); moves = []; s = engine.initial(deal); } }
+      else if (a && a.a) md = a.a;
+      else if (a && a.m) {
+        const [from, index, to] = a.m;
+        moves.push({ from, index, to }); s = engine.apply(s, { from, index, to });
+        for (let x = engine.nextAuto(s, md); x; x = engine.nextAuto(s, md)) { moves.push(x); s = engine.apply(s, x); }
+      }
+    }
+    restarts = [];
   }
 
   function clearHint() { hint = null; clearTimeout(hintTimer); }
@@ -252,7 +334,11 @@ export function mountGame(host, o) {
     const sheet = P.Sheet({
       title: t('table.stuckTitle'),
       children: [para(t('table.stuckBody'))],
-      footer: [btn(t('common.undo'), () => { close(); undo(); }, 'primary'), btn(o.newGameLabel || t('common.newGame'), () => { close(); o.onNewGame ? o.onNewGame() : newDeal(); })],
+      footer: [
+        btn(t('common.undo'), () => { close(); undo(); }, 'primary'),
+        o.restartInMenu ? btn(t('table.restartDeal'), () => { close(); restartDeal(); }) : null,
+        btn(o.newGameLabel || t('common.newGame'), () => { close(); o.onNewGame ? o.onNewGame() : newDeal(); }),
+      ],
       onClose: () => close(),
     });
     close = P.openSheet(sheet);
@@ -262,7 +348,9 @@ export function mountGame(host, o) {
     stopClock();
     won = true; selection = null;
     const { arrivals } = engine.replay(deal, moves);
-    const result = { deal, rulesId: engine.rulesId, time: Math.round(elapsed), moves: moves.length, undos, arrivals };
+    let code = null;
+    try { code = encodeReplay(engine, { rulesId: engine.rulesId, deal, daily: o.daily ?? null, timeMs: elapsed, mode0: mode0 || 'safe', log }); } catch { /* a replay is a bonus; the win still counts */ }
+    const result = { deal, rulesId: engine.rulesId, time: Math.round(elapsed), moves: moves.length, undos, arrivals, code };
     save();
     render(rects);
     setTimeout(() => o.onWin && o.onWin(result), rects ? 450 : 0);
@@ -272,13 +360,15 @@ export function mountGame(host, o) {
     if (rulesId && rulesId !== engine.rulesId) engine = createEngine(P, rulesId);
     stopClock();
     deal = n; moves = []; undos = 0; elapsed = 0; won = false; selection = null; clearHint();
+    log = []; restarts = []; mode0 = mode = null;
     state = engine.initial(deal);
     save(); render();
   }
 
   function openMenu() {
     const items = o.menu ? o.menu(ctl) : [];
-    menuSheet(t('table.menuTitle'), items.concat([
+    const restart = o.restartInMenu && moves.length && !won ? [{ label: t('table.restartDeal'), help: t('table.restartHelp'), onClick: restartDeal }] : [];
+    menuSheet(t('table.menuTitle'), restart.concat(items, [
       { label: t('common.howToPlay'), onClick: () => openRules('freecell') },
       { label: t('common.settings'), onClick: () => openSettings(() => render()) },
     ]));
@@ -311,7 +401,7 @@ export function mountGame(host, o) {
       const r = tryMove(selection.pile, selection.index, loc.pid, selection.flex);
       if (r.ok) { lastTap = { t: 0, pid: null }; return; }
       if (loc.index >= 0 && engine.canPickUp(state, loc.pid, loc.index)) { selection = { pile: loc.pid, index: loc.index }; render(); }
-      toast(r.reason || t('table.cantMove'));
+      toast(dsText(r.reason) || t('table.cantMove'));
       return;
     }
     if (loc.index < 0) return;
@@ -367,7 +457,7 @@ export function mountGame(host, o) {
         commit({ from, index, to: r.to }, rects);
         return;
       }
-      toast(r.reason || t('table.cantMove'));
+      toast(dsText(r.reason) || t('table.cantMove'));
     }
     render(rects);
   }
@@ -441,7 +531,7 @@ export function mountGame(host, o) {
       if (selection) {
         if (selection.pile === pid) { selection = null; render(); return; }
         const r = tryMove(selection.pile, selection.index, pid, selection.flex);
-        if (!r.ok) toast(r.reason || t('table.cantMove'));
+        if (!r.ok) toast(dsText(r.reason) || t('table.cantMove'));
         return;
       }
       if (!p.length) return;
@@ -457,7 +547,8 @@ export function mountGame(host, o) {
   render();
 
   const ctl = {
-    newDeal, undo, hint: showHint, render,
+    newDeal, undo, hint: showHint, render, restartDeal,
+    get log() { return log.slice(); },
     restart: () => newDeal(deal, engine.rulesId),
     get deal() { return deal; },
     get rulesId() { return engine.rulesId; },

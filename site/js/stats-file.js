@@ -26,7 +26,7 @@ export async function exportStats() {
   let file = null;
   try { file = new File([blob], FILE_NAME, { type: 'application/json' }); } catch { /* old Safari */ }
   if (file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-    try { await navigator.share({ files: [file], title: 'Parlor stats' }); return 'shared'; } catch { return 'cancelled'; }
+    try { await navigator.share({ files: [file], title: t('statsFile.shareTitle') }); return 'shared'; } catch { return 'cancelled'; }
   }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = FILE_NAME;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
@@ -52,10 +52,13 @@ export function merge(data) {
     const n = parseInt(k, 10);
     if (!(n > 0) || !validResult(r)) { skipped++; continue; }
     if (local.results[n]?.solved) continue; // the first solve on record stays
-    local.results[n] = { solved: true, late: !!r.late, time: r.time, moves: r.moves, undos: r.undos || 0, grid: r.grid, at: r.at || null };
+    const code = typeof r.code === 'string' && /^[A-Za-z0-9_-]{8,600}$/.test(r.code) ? r.code : null;
+    local.results[n] = { solved: true, late: !!r.late, watched: !!r.watched, time: r.time, moves: r.moves, undos: r.undos || 0, grid: r.grid, code, at: r.at || null };
     added++;
   }
   for (const k of Object.keys((data.daily && data.daily.started) || {})) if (parseInt(k, 10) > 0) local.started[k] = true;
+  local.watched = local.watched || {};
+  for (const k of Object.keys((data.daily && data.daily.watched) || {})) if (parseInt(k, 10) > 0) local.watched[k] = true;
   write(DAILY_KEY, local);
 
   let games = 0;

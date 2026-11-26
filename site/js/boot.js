@@ -1,7 +1,7 @@
 // Shared start-up for every page: settings, content packs, theme, service worker.
 import { initPWA } from './pwa.js';
 import { track } from './analytics.js';
-import { loadCopy } from './strings.js';
+import { loadCopy, localizeDesignSystem } from './strings.js';
 
 export const P = window.Parlor;
 
@@ -26,6 +26,7 @@ export function setSettings(next) {
 export async function boot(root) {
   P.settings.apply(settings);
   await loadCopy(root);
+  localizeDesignSystem(P);
   matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => P.settings.apply(settings));
 
   await Promise.all(FREE_PACKS.map(async (f) => {

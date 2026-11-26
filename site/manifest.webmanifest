@@ -9,14 +9,51 @@
   "orientation": "any",
   "background_color": "#1f5b43",
   "theme_color": "#1f5b43",
-  "categories": ["games", "entertainment"],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "icons": [
-    { "src": "icons/parlor-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/parlor-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/parlor-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/parlor-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/parlor-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/parlor-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Today's deal", "short_name": "Daily", "url": "daily/?source=shortcut", "icons": [{ "src": "icons/parlor-192.png", "sizes": "192x192" }] },
-    { "name": "FreeCell", "url": "freecell/?source=shortcut", "icons": [{ "src": "icons/parlor-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Today’s deal",
+      "short_name": "Daily",
+      "url": "daily/?source=shortcut",
+      "icons": [
+        {
+          "src": "icons/parlor-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "FreeCell",
+      "url": "freecell/?source=shortcut",
+      "icons": [
+        {
+          "src": "icons/parlor-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

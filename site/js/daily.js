@@ -44,10 +44,23 @@ export function msUntilNextDaily(date = new Date()) {
 }
 
 // ---------- records ----------
-// { results: { [n]: { solved, time, moves, undos, grid, at } }, started: { [n]: true } }
+// { results: { [n]: { solved, late, watched, time, moves, undos, grid, code, at } },
+//   started: { [n]: true }, watched: { [n]: true } }
+// code is the replay code (site/js/replay-code.js), saved once with the first solve.
+// watched: the player watched someone's replay of day n before solving it.
 
 export function records() {
-  return read(RECORDS_KEY, { results: {}, started: {} });
+  const r = read(RECORDS_KEY, { results: {}, started: {} });
+  r.watched = r.watched || {};
+  return r;
+}
+
+/** Watching a replay before solving: that day can no longer count toward the streak. */
+export function markWatched(n) {
+  const r = records();
+  if (r.results[n]?.solved) return;
+  r.watched[n] = true;
+  write(RECORDS_KEY, r);
 }
 
 export function markStarted(n) {
@@ -56,12 +69,16 @@ export function markStarted(n) {
   write(RECORDS_KEY, r);
 }
 
-/** Save a solve. Late solves (a past day) count toward Solved, never toward the streak. */
+/**
+ * Save a solve. It's locked in: the first solve is the record and later plays never change it.
+ * Late solves (a past day) and solves after watching a replay count toward Solved, never the streak.
+ */
 export function saveResult(n, result, { late = false } = {}) {
   const r = records();
   if (r.results[n]?.solved) return { saved: false, record: r.results[n] }; // replays never overwrite
   const best = bestTime(r);
-  r.results[n] = { solved: true, late, time: result.time, moves: result.moves, undos: result.undos, grid: shareGrid(result), at: new Date().toISOString() };
+  const watched = !!r.watched[n];
+  r.results[n] = { solved: true, late, watched, time: result.time, moves: result.moves, undos: result.undos, grid: shareGrid(result), code: result.code || null, at: new Date().toISOString() };
   write(RECORDS_KEY, r);
   return { saved: true, record: r.results[n], newBest: best == null || result.time < best };
 }
@@ -71,13 +88,14 @@ export function bestTime(r = records()) {
   return times.length ? Math.min(...times) : null;
 }
 
-const onTime = (r, n) => !!(r.results[n]?.solved && !r.results[n].late);
+const onTime = (r, n) => !!(r.results[n]?.solved && !r.results[n].late && !r.results[n].watched && !r.watched?.[n]);
 
-/** 'solved' | 'missed' (started, not solved) | 'none' (not played) | 'today' | 'future' | 'before' */
+/** 'solved' | 'watched' (watched a replay first, not solved) | 'missed' (started, not solved) | 'none' (not played) | 'today' | 'future' | 'before' */
 export function dayStatus(n, today = dailyNumber(), r = records()) {
   if (n < 1) return 'before';
   if (n > today) return 'future';
   if (r.results[n]?.solved) return 'solved';
+  if (r.watched?.[n]) return 'watched';
   if (n === today) return 'today';
   return r.started[n] ? 'missed' : 'none';
 }
@@ -96,7 +114,7 @@ export function summary(today = dailyNumber()) {
   for (let i = 6; i >= 0; i--) {
     const k = today - i;
     const st = dayStatus(k, today, r);
-    week.push({ n: k, date: dateOf(k), state: st === 'solved' ? 'solved' : st === 'today' ? 'today' : st === 'before' ? 'none' : 'missed' });
+    week.push({ n: k, date: dateOf(k), state: st === 'solved' ? 'solved' : st === 'today' || (st === 'watched' && k === today) ? 'today' : st === 'before' ? 'none' : 'missed' });
   }
   return { streak, longest, solved: solved.length, played: played.size, best: bestTime(r), week, today: r.results[today] || null };
 }

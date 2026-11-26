@@ -6,7 +6,9 @@
 
 Plays a full FreeCell deal and today's Daily through the UI (taps, drags, undo,
 reload-resume), checks offline play through the service worker and the share card,
-then fakes the date to Jan 21 2027 to test the Stats calendar and a late solve.
+then fakes the date to Jan 21 2027 to test the Stats calendar and a late solve, then
+shares a replay: restart + undo while solving, the replay link and QR, opening it as someone
+who hasn't solved (gate, confirm, viewer, play from here), solving after watching, a bad link.
 """
 import asyncio, base64, datetime, json, os
 from playwright.async_api import async_playwright
@@ -15,8 +17,8 @@ CHROME = os.environ.get('CHROME')  # optional path to a Chrome binary
 
 async def get_solution(pg, deal):
     return await pg.evaluate("""async (deal) => {
-      const { solve } = await import('/tools/solver.js');
-      return solve(window.Parlor, deal).moves.filter(m => !m.auto);
+      const { tableSolution } = await import('/tools/solver.js');
+      return tableSolution(window.Parlor, deal);
     }""", deal)
 
 async def card_el(pg, pid, index):
@@ -164,7 +166,7 @@ async def calendar():
         print('detail', await pg.locator('.pd-detail-chip').text_content(), '|', await pg.locator('.pd-detail-note').text_content())
         await pg.get_by_role('link', name='Play this deal').click(); await pg.wait_for_timeout(500)
         print('bar', await pg.locator('.pl-bar-deal').text_content(), pg.url)
-        sol = await pg.evaluate("""async () => { const { solve } = await import('/tools/solver.js'); const { dealFor } = await import('../js/daily.js'); return solve(window.Parlor, dealFor(50)).moves.filter(m=>!m.auto); }""")
+        sol = await pg.evaluate("""async () => { const { tableSolution } = await import('/tools/solver.js'); const { dealFor } = await import('../js/daily.js'); return tableSolution(window.Parlor, dealFor(50)); }""")
         for m in sol:
             await (await card_el_cal(pg, m['from'], m['index'])).click(position={'x':8,'y':6})
             await pg.locator(f'[data-pile="{m["to"]}"]').click(position={'x':8,'y':6})
@@ -179,9 +181,83 @@ async def calendar():
         print('errors', errs)
         await b.close()
 
+async def replays():
+    out = os.environ.get('OUT', '/tmp')
+    async with async_playwright() as p:
+        b = await (p.chromium.launch(executable_path=CHROME) if CHROME else p.chromium.launch())
+        a = await b.new_context(viewport={'width':390,'height':844}, timezone_id='America/Chicago')
+        pg = await a.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
+        await pg.goto(BASE+'daily/#play'); await pg.wait_for_timeout(500)
+        deal = await pg.evaluate("import(new URL('../js/daily.js', document.baseURI).href).then(m => m.dealFor(m.dailyNumber()))")
+        sol = await get_solution(pg, deal)
+        for i, m in enumerate(sol):
+            if i == 6:
+                await pg.get_by_role('button', name='Menu').click(); await pg.wait_for_timeout(200)
+                await pg.screenshot(path=out + '/shot-menu-restart.png')
+                await pg.get_by_role('button', name='Restart deal').click(); await pg.wait_for_timeout(300)
+                print('after restart moves', await pg.evaluate("JSON.parse(localStorage.getItem('parlor.daily.game')).moves.length"), 'toast', await pg.locator('.pa-toast.is-on').text_content())
+                await pg.screenshot(path=out + '/shot-restart-toast.png')
+                await pg.locator('.pa-toast-action').click(); await pg.wait_for_timeout(300)
+                print('after toast undo moves', await pg.evaluate("JSON.parse(localStorage.getItem('parlor.daily.game')).moves.length"))
+            if i == 9:
+                await tap_move(pg, sol[i]); await pg.wait_for_timeout(200)
+                await pg.get_by_role('button', name='Undo').click(); await pg.wait_for_timeout(200)
+            await tap_move(pg, m); await pg.wait_for_timeout(150)
+        await pg.wait_for_timeout(1200)
+        rec = await pg.evaluate("JSON.parse(localStorage.getItem('parlor.daily.v1')).results")
+        r = list(rec.values())[0]; code = r['code']
+        print('solved', pg.url, 'moves', r['moves'], 'undos', r['undos'], 'code chars', len(code or ''))
+        assert code
+        print('watch link', await pg.get_by_role('link', name='Watch your replay').count(), 'play again', await pg.get_by_role('link', name='Play again').count())
+        await pg.get_by_role('button', name='Share result').click(); await pg.wait_for_timeout(300)
+        await pg.get_by_role('switch', name='Add a replay link').click(); await pg.wait_for_timeout(600)
+        print('preview has link', 'Watch how: ' in await pg.locator('.pd-share-preview').text_content(), 'qr', await pg.locator('.pd-share-qr svg.pd-qr').count())
+        await pg.screenshot(path=out + '/shot-share-replay.png')
+        await pg.keyboard.press('Escape')
+        # own replay opens without the gate
+        await pg.goto(BASE+'daily/#r=' + code); await pg.wait_for_timeout(500)
+        print('own replay viewer', await pg.locator('.pr-viewer').count(), 'gate', await pg.locator('.pr-gate').count())
+
+        # someone who hasn't solved it
+        bctx = await b.new_context(viewport={'width':390,'height':844}, timezone_id='America/Chicago')
+        q = await bctx.new_page(); q.on('pageerror', lambda e: errs.append(str(e))); q.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
+        await q.goto(BASE+'daily/?ref=replay#r=' + code); await q.wait_for_timeout(600)
+        print('gate', await q.locator('.pr-gate h1').text_content(), '|', await q.locator('.pr-head p').text_content())
+        await q.screenshot(path=out + '/shot-replay-gate.png')
+        await q.get_by_role('button', name='Watch without solving').click(); await q.wait_for_timeout(300)
+        print('confirm', await q.locator('.pl-sheet-title').text_content())
+        await q.screenshot(path=out + '/shot-replay-confirm.png')
+        await q.get_by_role('button', name='Watch anyway').click(); await q.wait_for_timeout(500)
+        print('watched flag', await q.evaluate("JSON.parse(localStorage.getItem('parlor.daily.v1')).watched"))
+        for _ in range(12): await q.get_by_role('button', name='Next move').click()
+        await q.wait_for_timeout(200)
+        print('step', await q.locator('.pr-step').text_content(), '|', await q.locator('.pr-desc').text_content(), '| cards', await q.locator('.pr-board .pl-card').count())
+        await q.screenshot(path=out + '/shot-replay-viewer.png')
+        await q.get_by_role('button', name='Play', exact=True).click(); await q.wait_for_timeout(1600)
+        await q.get_by_role('button', name='Pause').click()
+        print('after play', await q.locator('.pr-step').text_content())
+        await q.locator('.pr-seg').nth(1).click(); await q.wait_for_timeout(200)
+        print('clean line', await q.locator('.pr-seg').nth(1).text_content(), await q.locator('.pr-step').text_content())
+        await q.get_by_role('button', name='Play from here').click(); await q.wait_for_timeout(600)
+        print('practice', await q.locator('.pl-bar-deal').text_content(), 'stats', await q.locator('.pl-stat-value').all_text_contents())
+        # solve today after watching: counts as Solved, not the streak
+        await q.goto(BASE+'daily/#play'); await q.wait_for_timeout(500)
+        for m in sol: await tap_move(q, m); await q.wait_for_timeout(120)
+        await q.wait_for_timeout(1200)
+        rr = await q.evaluate("JSON.parse(localStorage.getItem('parlor.daily.v1'))")
+        print('after watching then solving', q.url, 'watched', list(rr['results'].values())[0]['watched'])
+        await q.goto(BASE+'daily/#stats'); await q.wait_for_timeout(400)
+        print('streak', (await q.locator('.pd-stats-4 .pd-stat-value').all_text_contents())[0], 'chip', await q.locator('.pd-detail-chip').text_content())
+        await q.screenshot(path=out + '/shot-cal-watched.png', full_page=True)
+        await q.goto(BASE+'daily/#r=AQYAAgDGnot-a-real-code'); await q.wait_for_timeout(400)
+        print('bad link', await q.locator('.pr-gate h1').text_content())
+        print('errors', errs)
+        await b.close()
+
 async def main():
     await play()
     await pwa()
     await calendar()
+    await replays()
 
 asyncio.run(main())
