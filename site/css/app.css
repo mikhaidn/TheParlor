@@ -62,7 +62,7 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;
   background: var(--surface-raised); border: 1px solid var(--hairline); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); box-shadow: var(--shadow-panel);
 }
-.pa-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; border-top: 1px solid var(--hairline); padding-top: var(--space-4); font: 400 13px/18px var(--font-ui); color: var(--ink-muted); }
+.pa-foot { margin-top: auto; display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); flex-wrap: wrap; border-top: 1px solid var(--hairline); padding-top: var(--space-4); font: 400 13px/18px var(--font-ui); color: var(--ink-muted); }
 
 .pa-btn {
   display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 48px; padding: 0 var(--space-4);

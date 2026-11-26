@@ -39,6 +39,7 @@ const ASSETS = [
   "./js/launcher.js",
   "./js/pwa.js",
   "./js/share.js",
+  "./js/stats-file.js",
   "./js/store.js",
   "./js/table.js",
   "./manifest.webmanifest",

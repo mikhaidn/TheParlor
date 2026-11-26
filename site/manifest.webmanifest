@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Parlor — Classic Card Games",
   "short_name": "Parlor",
-  "description": "FreeCell and other classic card games. Plays offline.",
+  "description": "FreeCell and other classic card games.",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",

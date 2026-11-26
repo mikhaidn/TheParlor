@@ -128,9 +128,9 @@ export function shareText(n, rec, link, format = SHARE_FORMAT) {
 }
 
 export const SHARE_CAPTION = {
-  squares: 'Each square is a card, ace to king: green went home early, red late. No spoilers.',
-  bars: 'Each bar is a card, ace to king. Taller bars went home later. No spoilers.',
-  short: 'One line: fits a group chat or a post.',
+  squares: 'Ace to king. Green went home early, red late.',
+  bars: 'Ace to king. Taller bars went home later.',
+  short: '',
 };
 
 function fmt(ms) {

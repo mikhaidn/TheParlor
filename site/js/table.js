@@ -11,6 +11,7 @@
 import { createEngine } from './engine.js';
 import { read, write, remove, formatTime } from './store.js';
 import { P, getSettings, setSettings } from './boot.js';
+import { statsGroup } from './stats-file.js';
 
 const DRAG_THRESHOLD = 6;
 const DOUBLE_TAP_MS = 400;
@@ -50,6 +51,7 @@ export function openSettings(onChange) {
     onChange: (next) => { setSettings(next); onChange && onChange(); },
     onClose: () => close(),
   });
+  panel.querySelector('.pl-sheet-body')?.appendChild(statsGroup(P));
   close = P.openSheet(panel);
 }
 

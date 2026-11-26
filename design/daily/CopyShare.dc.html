@@ -92,15 +92,15 @@ class Component extends DCLogic {
       lines = ['Parlor Daily #1 · FreeCell', '3:41 · 92 moves']
         .concat(suits.map((s) => SUIT_PLAIN[s] + ' ' + q[s].map((i) => BAR[i]).join('')))
         .concat(['Same deal, your turn → ' + url]);
-      caption = 'Each bar is a card, ace to king. Taller bars went home later. No spoilers.';
+      caption = 'Ace to king. Taller bars went home later.';
     } else if (format === 'short') {
       lines = ['Parlor Daily #1 ♠♥♦♣ solved in 3:41 (92 moves). Same deal, your turn → ' + url];
-      caption = 'One line: fits a group chat or a post.';
+      caption = '';
     } else {
       lines = ['Parlor Daily #1 · FreeCell', 'Solved in 3:41 · 92 moves']
         .concat(suits.map((s) => SUIT[s] + ' ' + q[s].map((i) => SQ[i]).join('')))
         .concat(['Same deal, your turn → ' + url]);
-      caption = 'Each square is a card, ace to king: green went home early, red late. No spoilers.';
+      caption = 'Ace to king. Green went home early, red late.';
     }
     return {
       lines: lines.map((text) => ({ text, spacing: format === 'bars' ? '0.04em' : 'normal' })),

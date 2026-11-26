@@ -38,7 +38,9 @@ To try install/offline on a phone you need HTTPS, so use the Pages URL (or a tun
 | Undo / Hint | Bar buttons | Bar buttons | `U` / `H` (also Ctrl+Z) |
 | Cancel selection | Tap the same pile | Click the same pile | `Esc` |
 
-Players can switch to tap-only or drag-only input, plus left-handed layout, card size, large index, four-color deck, theme, auto-move and timer, in **Settings**. The settings export/import as a JSON file.
+Players can switch to tap-only or drag-only input, plus left-handed layout, card size, large index, four-color deck, theme, auto-move and timer, in **Settings**.
+
+**Backups:** Settings has two files. *Settings file* holds preferences. *Stats file* (`parlor-stats.json`) holds Daily results, streaks and per-game stats. Importing a stats file merges into what's on the device and never overwrites an existing Daily result, so it's safe to use when moving to a new phone, after the browser clears storage, or when the site moves to a new domain.
 
 ## Layout
 
@@ -54,6 +56,7 @@ site/                     ← deployed as-is
     daily.js              date → daily number → deal, streaks, share grid + text
     share.js              share card (canvas PNG), Web Share → clipboard → download fallbacks
     pwa.js / sw.js        install prompt, iOS hint, update-between-games, offline cache
+    stats-file.js         export/import of Daily results + game stats (merge, never overwrite)
     analytics.js          launch-metrics events, queued on-device only (no network until ENDPOINT is set)
   content/                packs (decks, tables, rulesets) and settings presets as JSON definitions
 design/                   the design specs this implements (see design/README.md)

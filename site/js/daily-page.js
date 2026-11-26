@@ -89,9 +89,8 @@ function today() {
       h('h2', { id: 'pd-week' }, 'This week'),
       h('div', { class: 'pd-week' }, s.week.map((d) => h('div', { class: 'pd-day', 'data-state': d.state, title: `${formatDate(d.date)} — ${d.state === 'today' ? 'today' : d.state}` },
         h('i', {}), h('span', {}, shortDay(d.date)))))),
-    h('footer', { class: 'pa-foot' },
-      h('span', {}, 'Free, no ads, no account.'),
-      TIP_URL ? h('a', { class: 'pa-btn pa-btn-outline', href: TIP_URL, target: '_blank', rel: 'noopener', onclick: () => track('tip_start', {}) }, 'Tip the table') : null)));
+    TIP_URL ? h('footer', { class: 'pa-foot' },
+      h('a', { class: 'pa-btn pa-btn-outline', href: TIP_URL, target: '_blank', rel: 'noopener', onclick: () => track('tip_start', {}) }, 'Tip the table')) : null));
 
   if (next) countdown = setInterval(() => { next.textContent = `Next deal in ${nextIn()}`; if (dailyNumber() !== n) route(); }, 30000);
 }
@@ -143,7 +142,7 @@ function result() {
   const rows = ['spades', 'hearts', 'diamonds', 'clubs'].map((suit) =>
     h('div', { class: 'pd-row' }, P.Suit({ suit, size: 16, label: suit }), h('div', { class: 'pd-cells' }, rec.grid[suit].map((q) => h('i', { 'data-q': q })))));
 
-  const note = h('div', { class: 'pd-muted' }, `Replays don’t change today’s result. Next deal in ${nextIn()}.`);
+  const note = h('div', { class: 'pd-muted' }, `Next deal in ${nextIn()}`);
   const shareBtn = h('button', { class: 'pa-btn pa-btn-primary', type: 'button', onclick: () => openShare(rec, s.streak) },
     svgIcon('M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'), 'Share result');
 
@@ -157,18 +156,18 @@ function result() {
         h('div', {}, h('span', { class: 'pa-label' }, 'Time'), h('b', {}, formatTime(rec.time))),
         h('div', {}, h('span', { class: 'pa-label' }, 'Moves'), h('b', {}, String(rec.moves))),
         h('div', {}, h('span', { class: 'pa-label' }, 'Undos'), h('b', {}, String(rec.undos)))),
-      h('div', { class: 'pd-best' },
+      isBest || s.streak > 1 ? h('div', { class: 'pd-best' },
         isBest ? h('span', { class: 'pd-chip' }, 'New best') : null,
-        s.streak > 1 ? `${s.streak}-day streak` : 'Come back tomorrow for a new deal'),
+        s.streak > 1 ? `${s.streak}-day streak` : null) : null,
       h('section', { class: 'pd-gridcard', 'aria-label': 'Share grid' },
         h('header', {}, h('b', {}, `Parlor Daily #${n}`), h('span', {}, `${formatTime(rec.time)} · ${rec.moves} moves`)),
         h('div', { class: 'pd-rows' }, rows),
-        h('p', {}, 'Each square is a card, ace to king, shaded by when it reached its foundation. No spoilers.')),
+        h('p', {}, 'Ace to king, shaded by when each card went home.')),
       h('div', { class: 'pd-actions' },
         shareBtn,
         h('a', { class: 'pa-btn pa-btn-felt', href: '#replay' }, 'Replay this deal'),
         note))));
-  countdown = setInterval(() => { note.textContent = `Replays don’t change today’s result. Next deal in ${nextIn()}.`; }, 30000);
+  countdown = setInterval(() => { note.textContent = `Next deal in ${nextIn()}`; }, 30000);
 }
 
 // ---------- Share sheet (design/daily/CopyShare.dc.html) ----------
@@ -204,7 +203,7 @@ function openShare(rec, streak) {
   const sheet = P.Sheet({
     title: 'Share result',
     className: 'pd-share',
-    children: [preview, h('p', { class: 'pl-caption pd-share-caption' }, SHARE_CAPTION[SHARE_FORMAT]), copyBtn,
+    children: [preview, SHARE_CAPTION[SHARE_FORMAT] ? h('p', { class: 'pl-caption pd-share-caption' }, SHARE_CAPTION[SHARE_FORMAT]) : null, copyBtn,
       h('div', { class: 'pd-share-row' + (native ? '' : ' is-single') }, native, image)],
     onClose: () => close(),
   });
@@ -212,6 +211,7 @@ function openShare(rec, streak) {
 }
 
 addEventListener('hashchange', route);
+addEventListener('parlor:stats-changed', () => { if (!game) route(); });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && dailyNumber() !== n && !game?.inProgress) route();
 });
