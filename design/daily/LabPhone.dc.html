@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lab drawer on a phone table</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+button{font-family:inherit}
+input[type=range]{accent-color:#1f5b43}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #1f5b43; color: #f4efe3; font-family: 'Instrument Sans', system-ui, sans-serif">
+  <div style="display: flex; align-items: center; gap: 8px; margin: 12px 12px 0; padding: 6px 8px 6px 12px; border-radius: 10px; background: #17462f">
+    <span style="font-family: Fraunces, Georgia, serif; font-size: 20px; line-height: 26px; font-weight: 600">Daily #2</span>
+    <span style="display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border-radius: 4px; background: #d4ad55; color: #2a2110; font-size: 12px; font-weight: 600; letter-spacing: 0.08em">LAB</span>
+    <span style="margin-left: auto; font-size: 14px; font-variant-numeric: tabular-nums">18 · 1:04</span>
+    <button type="button" aria-label="Menu" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #f4efe3; display: flex; align-items: center; justify-content: center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+    </button>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; padding: 16px 12px 0">
+    <sc-for list="{{top}}" as="s" hint-placeholder-count="8">
+      <div style="height: 58px; border-radius: 4px; background: #17462f; box-shadow: 0 0 0 1px #8fb9a3 inset"></div>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; padding: 16px 12px 0">
+    <sc-for list="{{cols}}" as="col" hint-placeholder-count="8">
+      <div style="position: relative; height: 230px">
+        <sc-for list="{{col.cards}}" as="c" hint-placeholder-count="5">
+          <div style="{{c.css}}"><span style="{{c.idxCss}}">{{c.rank}}</span></div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: rgba(8,22,16,0.35)"></div>
+  <div aria-hidden="true" style="position: absolute; left: 196px; top: 212px; width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; border: 2px dashed #f4d27a; background: rgba(244,210,122,0.18)"></div>
+  <div aria-hidden="true" style="position: absolute; left: 216px; top: 192px; height: 22px; padding: 0 6px; border-radius: 4px; background: #17462f; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; line-height: 22px">touch · 7.4 / 10 px</div>
+
+  <section role="dialog" aria-label="Lab" style="position: absolute; left: 0; right: 0; bottom: 0; background: #ffffff; color: #1d1f1e; border-radius: 16px 16px 0 0; box-shadow: 0 -6px 24px rgba(0,0,0,0.28); padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 14px">
+    <div aria-hidden="true" style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #e2dccf"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">Lab</h2>
+      <button type="button" aria-label="Close" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #1d1f1e; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+
+    <sc-for list="{{knobs}}" as="k" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="display: flex; align-items: baseline; gap: 8px">
+          <label for="{{k.id}}" style="font-size: 15px; line-height: 20px; font-weight: 600">{{k.label}}</label>
+          <span style="margin-left: auto; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; {{k.valueCss}}">{{k.shown}}</span>
+        </div>
+        <input type="range" id="{{k.id}}" min="{{k.min}}" max="{{k.max}}" value="{{k.value}}" style="width: 100%; height: 32px; margin: 0">
+        <div style="font-size: 12px; line-height: 16px; color: #5b605c">{{k.def}}</div>
+      </div>
+    </sc-for>
+
+    <label style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-size: 15px; font-weight: 600">
+      Show touch points
+      <input type="checkbox" checked="{{ true }}" style="width: 22px; height: 22px; accent-color: #1f5b43">
+    </label>
+
+    <div style="font-size: 13px; line-height: 18px; color: #5b605c">Lab is on in your games, so this solve won’t count toward your streak or stats.</div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <a href="Lab.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 10px; background: #d4ad55; color: #2a2110; font-size: 16px; font-weight: 600; text-decoration: none">Open full Lab</a>
+      <button type="button" style="min-height: 48px; border-radius: 10px; border: 1px solid #7f847d; background: transparent; color: #1d1f1e; font-size: 16px; font-weight: 600">Turn Lab off</button>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const RANKS = [['K', 'Q', 'J', '10', '9'], ['8', '7', '6', '5'], ['A', '2', '3', '4', '5'], ['9', '8', '7', 'Q'], ['J', '10', '9', '8'], ['6', '5', '4', '3'], ['K', 'Q', 'J'], ['3', '2', 'A']];
+    const red = (ci, k) => (ci + k) % 2 === 0;
+    return {
+      top: [1, 2, 3, 4, 5, 6, 7, 8],
+      cols: RANKS.map((rs, ci) => ({
+        cards: rs.map((rank, k) => ({
+          rank,
+          css: `position: absolute; left: 0; right: 0; top: ${k * 20}px; height: 58px; box-sizing: border-box; border-radius: 4px; background: #fbf7ec; box-shadow: 0 0 0 1px #d6ccb6 inset, 0 1px 2px rgba(0,0,0,0.28)` + (ci === 3 && k === rs.length - 1 ? '; transform: translate(10px, -8px) rotate(-2deg) scale(1.04); box-shadow: 0 0 0 1px #d6ccb6 inset, 0 10px 22px rgba(0,0,0,0.38); z-index: 5' : ''),
+          idxCss: `position: absolute; left: 4px; top: 3px; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 13px; line-height: 13px; color: ${red(ci, k) ? '#b3261e' : '#1d1f1e'}`,
+        })),
+      })),
+      knobs: [
+        { id: 'p-thr', label: 'Drag threshold', min: 0, max: 24, value: 10, shown: '10 px', def: 'default 6 px', valueCss: 'color: #1f5b43; background: #e7efe9; padding: 0 6px; border-radius: 4px' },
+        { id: 'p-glide', label: 'Glide to pile', min: 0, max: 600, value: 240, shown: '240 ms', def: 'default 180 ms', valueCss: 'color: #1f5b43; background: #e7efe9; padding: 0 6px; border-radius: 4px' },
+        { id: 'p-dbl', label: 'Double-tap window', min: 150, max: 700, value: 400, shown: '400 ms', def: 'default', valueCss: 'color: #1d1f1e' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

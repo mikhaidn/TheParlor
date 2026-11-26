@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Parlor Lab: theme and type</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;family=JetBrains+Mono:wght@400&amp;family=Playfair+Display:wght@500;600&amp;family=Libre+Baskerville:wght@400;700&amp;family=DM+Serif+Display&amp;family=Inter:wght@400;600&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+button,select{font-family:inherit}
+input[type=range]{accent-color:#1f5b43}
+</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 900px; background: #f6f2e8; color: #1d1f1e; font-family: 'Instrument Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="background: #1d1f1e; color: #f4efe3; padding: 0 24px">
+    <div style="max-width: 1360px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; min-height: 64px">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <div style="font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">Parlor</div>
+        <span style="display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border-radius: 4px; background: #d4ad55; color: #2a2110; font-size: 12px; font-weight: 600; letter-spacing: 0.08em">LAB</span>
+      </div>
+      <nav aria-label="Lab sections" style="display: flex; gap: 4px; flex-wrap: wrap">
+        <a href="Lab.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; color: #bcd2c5; font-size: 15px; font-weight: 600; text-decoration: none">Drag &amp; motion</a>
+        <a href="LabTheme.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; background: #34403a; color: #f4efe3; font-size: 15px; font-weight: 600; text-decoration: none">Theme &amp; type</a>
+        <a href="Lab.dc.html#flags" style="display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; color: #bcd2c5; font-size: 15px; font-weight: 600; text-decoration: none">Flags</a>
+      </nav>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+        <span style="font-size: 13px; color: #bcd2c5; font-variant-numeric: tabular-nums">{{changeLabel}}</span>
+        <button type="button" onClick="{{resetAll}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #6b706a; background: transparent; color: #f4efe3; font-size: 15px; font-weight: 600; cursor: pointer">Reset all</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px">
+    <div style="max-width: 1360px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+      <aside aria-labelledby="tok-h" style="flex: 1 1 360px; min-width: 0; background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 20px; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <h1 id="tok-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; line-height: 26px; font-weight: 600">Tokens</h1>
+          <div role="group" aria-label="Theme" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; background: #f6f2e8; border-radius: 10px; padding: 4px; width: 180px">
+            <sc-for list="{{themes}}" as="th" hint-placeholder-count="2">
+              <button type="button" aria-pressed="{{th.on}}" onClick="{{th.pick}}" style="min-height: 36px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; {{th.css}}">{{th.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+          <section style="display: flex; flex-direction: column; gap: 2px">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c; padding-bottom: 6px">{{g.title}}</div>
+            <sc-for list="{{g.tokens}}" as="t" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid #f0ebe0">
+                <input type="color" aria-label="{{t.aria}}" value="{{t.hex}}" onChange="{{t.set}}" style="width: 36px; height: 36px; padding: 0; border: 1px solid #e2dccf; border-radius: 8px; background: transparent; cursor: pointer">
+                <div style="display: flex; flex-direction: column; min-width: 0; flex-grow: 1">
+                  <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 18px">{{t.name}}</span>
+                  <span style="font-size: 12px; line-height: 16px; color: #5b605c; font-variant-numeric: tabular-nums">{{t.sub}}</span>
+                </div>
+                <sc-if value="{{t.hasCheck}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex: none; display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; {{t.chipCss}}">{{t.chip}}</span>
+                </sc-if>
+                <sc-if value="{{t.changed}}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{t.reset}}" aria-label="{{t.resetAria}}" style="flex: none; min-height: 36px; border: 0; background: transparent; padding: 0 4px; color: #1d1f1e; font-size: 12px; font-weight: 600; text-decoration: underline; cursor: pointer">Reset</button>
+                </sc-if>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </aside>
+
+      <section aria-labelledby="prev-h" style="flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+          <h2 id="prev-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 28px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em">Live preview</h2>
+          <div style="font-size: 14px; line-height: 20px; color: #5b605c">{{previewNote}}</div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end">
+          <label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; flex: 1 1 180px">
+            Display font
+            <select value="{{display}}" onChange="{{setDisplay}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #7f847d; background: #ffffff; color: #1d1f1e; padding: 0 10px; font-size: 15px">
+              <option value="Fraunces">Fraunces (current)</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Libre Baskerville">Libre Baskerville</option>
+              <option value="DM Serif Display">DM Serif Display</option>
+            </select>
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; flex: 1 1 180px">
+            UI font
+            <select value="{{ui}}" onChange="{{setUi}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #7f847d; background: #ffffff; color: #1d1f1e; padding: 0 10px; font-size: 15px">
+              <option value="Instrument Sans">Instrument Sans (current)</option>
+              <option value="Inter">Inter</option>
+              <option value="Atkinson Hyperlegible">Atkinson Hyperlegible</option>
+              <option value="IBM Plex Sans">IBM Plex Sans</option>
+            </select>
+          </label>
+          <label for="idx" style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; flex: 1 1 180px">
+            <span style="display: flex; justify-content: space-between">Card index size <span style="font-variant-numeric: tabular-nums">{{idxLabel}}</span></span>
+            <input id="idx" type="range" min="0.22" max="0.4" step="0.01" value="{{idxScale}}" onChange="{{setIdx}}" style="width: 100%; height: 44px; margin: 0">
+          </label>
+        </div>
+
+        <div style="{{feltCss}}">
+          <div style="display: flex; align-items: center; gap: 16px; padding: 10px 14px; border-radius: 10px; {{barCss}}">
+            <span style="font-size: 22px; line-height: 28px; font-weight: 600; {{displayFont}}">FreeCell</span>
+            <span style="font-size: 13px; {{mutedOnFelt}}">Deal #617</span>
+            <span style="margin-left: auto; font-size: 14px; font-variant-numeric: tabular-nums; {{onFelt}}">42 moves · 3:18</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+            <div style="display: flex; gap: 10px">
+              <sc-for list="{{cells}}" as="s" hint-placeholder-count="4">
+                <div style="{{s.css}}">
+                  <sc-if value="{{s.card}}" hint-placeholder-val="{{ false }}">
+                    <div style="{{s.cardCss}}"><div style="{{s.cornerCss}}">{{s.rank}}<svg width="{{s.pip}}" height="{{s.pip}}" viewBox="0 0 24 24" fill="{{s.ink}}" aria-hidden="true"><path d="{{s.d}}"></path></svg></div></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: 10px">
+              <sc-for list="{{founds}}" as="f" hint-placeholder-count="4">
+                <div style="{{f.css}}">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="{{f.line}}" aria-hidden="true"><path d="{{f.d}}"></path></svg>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; min-height: 230px">
+            <sc-for list="{{tab}}" as="col" hint-placeholder-count="6">
+              <div style="position: relative; width: 72px; height: 230px">
+                <sc-for list="{{col.cards}}" as="c" hint-placeholder-count="4">
+                  <div style="{{c.css}}">
+                    <div style="{{c.cornerCss}}">{{c.rank}}<svg width="{{c.pip}}" height="{{c.pip}}" viewBox="0 0 24 24" fill="{{c.ink}}" aria-hidden="true"><path d="{{c.d}}"></path></svg></div>
+                    <sc-if value="{{c.back}}" hint-placeholder-val="{{ false }}">
+                      <div style="{{c.backCss}}"></div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="{{chromeCss}}">
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; {{inkMuted}}">STREAK</div>
+            <div style="font-size: 28px; line-height: 32px; font-weight: 600; {{displayFont}}; {{ink}}">12 days</div>
+            <div style="font-size: 14px; line-height: 20px; {{inkMuted}}">Solved 41 of 44 · best 2:58</div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+            <span style="{{redChipCss}}">Hearts · suit-red-chrome</span>
+            <button type="button" style="{{brassBtnCss}}">Play today’s deal</button>
+          </div>
+        </div>
+
+        <section aria-labelledby="exp-h" style="display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <h3 id="exp-h" style="margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">EXPORT · TOKENS.JSON PATCH</h3>
+            <div style="display: flex; gap: 8px">
+              <button type="button" style="min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #7f847d; background: transparent; color: #1d1f1e; font-size: 14px; font-weight: 600; cursor: pointer">Import…</button>
+              <button type="button" style="min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #7f847d; background: transparent; color: #1d1f1e; font-size: 14px; font-weight: 600; cursor: pointer">Copy JSON</button>
+            </div>
+          </div>
+          <pre style="margin: 0; padding: 12px; border-radius: 10px; background: #1d1f1e; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; line-height: 18px; white-space: pre-wrap; overflow-x: auto">{{exportJson}}</pre>
+        </section>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { theme: 'light', edits: { light: { 'on-felt-muted': '#8fae9c' }, dark: {} }, display: 'Fraunces', ui: 'Instrument Sans', idx: 0.28 };
+  }
+  base() {
+    return {
+      felt: ['#1f5b43', '#143a2b'], 'felt-deep': ['#17462f', '#0e2a1f'], 'felt-line': ['#8fb9a3', '#6f9a85'],
+      'on-felt': ['#f4efe3', '#ece6d8'], 'on-felt-muted': ['#bcd2c5', '#a9c0b3'], hint: ['#8fd0f5', '#7cc4f0'], 'focus-felt': ['#f4d27a', '#f0cc6e'],
+      'card-face': ['#fbf7ec', '#e9e3d4'], 'card-edge': ['#d6ccb6', '#b3a98f'], 'suit-red': ['#b3261e', '#a8241c'], 'suit-black': ['#1d1f1e', '#1d1f1e'],
+      'card-back': ['#7d1f2c', '#6a1a25'], 'card-back-line': ['#a84353', '#8e3442'],
+      surface: ['#f6f2e8', '#181a19'], 'surface-raised': ['#ffffff', '#232624'], ink: ['#1d1f1e', '#ece7da'], 'ink-muted': ['#5b605c', '#a3a89f'],
+      'suit-red-chrome': ['#b3261e', '#e5685d'], brass: ['#d4ad55', '#c9a24a'], 'on-brass': ['#2a2110', '#231b0c'],
+    };
+  }
+  renderVals() {
+    const s = this.state, B = this.base(), ti = s.theme === 'light' ? 0 : 1;
+    const col = (n) => s.edits[s.theme][n] || B[n][ti];
+    const lum = (hex) => {
+      const h = hex.replace('#', ''), c = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+        .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const ratio = (a, b) => { const x = lum(col(a)), y = lum(col(b)); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const CHECKS = {
+      'felt-line': ['felt', 3], 'on-felt': ['felt', 4.5], 'on-felt-muted': ['felt', 4.5], 'hint': ['felt', 3], 'focus-felt': ['felt', 3],
+      'suit-red': ['card-face', 4.5], 'suit-black': ['card-face', 4.5], 'card-edge': null,
+      ink: ['surface', 4.5], 'ink-muted': ['surface', 4.5], 'suit-red-chrome': ['surface-raised', 4.5], 'on-brass': ['brass', 4.5],
+    };
+    const GROUPS = [
+      ['TABLE', ['felt', 'felt-deep', 'felt-line', 'on-felt', 'on-felt-muted', 'hint', 'focus-felt']],
+      ['CARDS', ['card-face', 'card-edge', 'suit-red', 'suit-black', 'card-back', 'card-back-line']],
+      ['CHROME', ['surface', 'surface-raised', 'ink', 'ink-muted', 'suit-red-chrome', 'brass', 'on-brass']],
+    ];
+    let fails = 0;
+    const groups = GROUPS.map(([title, names]) => ({
+      title,
+      tokens: names.map((n) => {
+        const chk = CHECKS[n], r = chk ? ratio(n, chk[0]) : 0, ok = chk ? r >= chk[1] : true;
+        if (!ok) fails++;
+        const changed = !!s.edits[s.theme][n];
+        return {
+          name: n, hex: col(n), changed, hasCheck: !!chk,
+          aria: n + ' colour', resetAria: 'Reset ' + n,
+          sub: col(n) + (changed ? ' · was ' + B[n][ti] : '') + (chk ? ' · on ' + chk[0] : ''),
+          chip: chk ? r.toFixed(1) + ':1 ' + (ok ? 'Pass' : 'Below ' + chk[1]) : '',
+          chipCss: ok ? 'background: #e7efe9; color: #1f5b43' : 'background: #f8e3e1; color: #8c1d17',
+          set: (e) => this.setState({ edits: { ...s.edits, [s.theme]: { ...s.edits[s.theme], [n]: e.target.value } } }),
+          reset: () => { const t = { ...s.edits[s.theme] }; delete t[n]; this.setState({ edits: { ...s.edits, [s.theme]: t } }); },
+        };
+      }),
+    }));
+
+    const SUIT = {
+      h: 'M12 21s-7.5-4.6-9.6-9.1C.9 8.6 2.9 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.7 0 5.7 4.1 4.2 7.4C19.5 16.4 12 21 12 21z',
+      s: 'M12 2s-8 6-8 11a4 4 0 0 0 7 2.6V18l-2 3h6l-2-3v-2.4A4 4 0 0 0 20 13c0-5-8-11-8-11z',
+      d: 'M12 2l8 10-8 10-8-10z',
+      c: 'M12 3a3.8 3.8 0 0 1 3.6 5A3.8 3.8 0 1 1 13.4 15l1.1 6h-5l1.1-6a3.8 3.8 0 1 1-2.2-7A3.8 3.8 0 0 1 12 3z',
+    };
+    const RED = { h: 1, d: 1 };
+    const disp = `'${s.display}', Georgia, serif`, uiF = `'${s.ui}', system-ui, sans-serif`;
+    const idx = Math.round(72 * s.idx), pip = Math.round(idx * 0.8);
+    const cornerCss = `position: absolute; left: 6px; right: 6px; top: 5px; display: flex; justify-content: space-between; align-items: center; font-family: ${disp}; font-weight: 600; font-size: ${idx}px; line-height: ${idx}px`;
+    const face = (extra) => `position: absolute; left: 0; width: 72px; height: 100px; box-sizing: border-box; border-radius: 6px; background: ${col('card-face')}; box-shadow: 0 0 0 1px ${col('card-edge')} inset, 0 1px 2px rgba(0,0,0,0.28)${extra || ''}`;
+    const card = (rank, suit, top, extra) => ({ rank, d: SUIT[suit], pip, ink: RED[suit] ? col('suit-red') : col('suit-black'), cornerCss, back: false,
+      css: face(extra) + `; top: ${top}px; color: ${RED[suit] ? col('suit-red') : col('suit-black')}` });
+    const slot = `width: 72px; height: 100px; box-sizing: border-box; border-radius: 6px; background: ${col('felt-deep')}; box-shadow: 0 0 0 1px ${col('felt-line')} inset; display: flex; align-items: center; justify-content: center; position: relative`;
+
+    const cells = [0, 1, 2, 3].map((i) => i === 1
+      ? { css: slot, card: true, rank: 'J', d: SUIT.d, pip, ink: col('suit-red'), cornerCss, cardCss: face() + '; top: 0' }
+      : { css: slot, card: false });
+    const founds = ['s', 'h', 'd', 'c'].map((k) => ({ css: slot, d: SUIT[k], line: col('felt-line') }));
+    const T = [
+      [['K', 's'], ['Q', 'h'], ['J', 'c'], ['10', 'd']],
+      [['9', 'c'], ['8', 'h'], ['7', 's']],
+      [['5', 'd'], ['4', 'c'], ['3', 'h'], ['2', 's']],
+      [['Q', 'd'], ['6', 's']],
+      [['back'], ['back'], ['A', 'h']],
+      [['10', 'c'], ['9', 'h']],
+    ];
+    const tab = T.map((cs, ci) => ({
+      cards: cs.map(([r, su], k) => {
+        if (r === 'back') return { back: true, rank: '', d: '', pip: 0, ink: 'transparent', cornerCss, css: face() + `; top: ${k * 26}px`,
+          backCss: `position: absolute; inset: 5px; border-radius: 4px; background: ${col('card-back')}; background-image: repeating-linear-gradient(45deg, ${col('card-back-line')} 0 1px, transparent 1px 8px), repeating-linear-gradient(-45deg, ${col('card-back-line')} 0 1px, transparent 1px 8px)` };
+        const last = k === cs.length - 1;
+        const extra = ci === 1 && k >= 1 ? `, 0 0 0 3px ${col('brass')}` : ci === 3 && last ? `, 0 0 0 3px ${col('hint')}` : '';
+        return card(r, su, k * 26, extra);
+      }),
+    }));
+
+    const nEdits = Object.keys(s.edits.light).length + Object.keys(s.edits.dark).length + (s.display !== 'Fraunces') + (s.ui !== 'Instrument Sans') + (s.idx !== 0.28);
+    const patch = { color: {} };
+    ['light', 'dark'].forEach((th) => Object.entries(s.edits[th]).forEach(([n, v]) => { (patch.color[n] = patch.color[n] || {})[th] = v; }));
+    if (s.display !== 'Fraunces' || s.ui !== 'Instrument Sans') patch.type = { families: { display: disp, ui: uiF } };
+    if (s.idx !== 0.28) patch.card = { 'card-index-scale': s.idx };
+
+    return {
+      groups,
+      themes: [['light', 'Day'], ['dark', 'Night']].map(([id, label]) => ({ label, on: s.theme === id,
+        css: s.theme === id ? 'background: #ffffff; color: #1d1f1e; box-shadow: 0 1px 2px rgba(29,31,30,0.16)' : 'background: transparent; color: #5b605c',
+        pick: () => this.setState({ theme: id }) })),
+      changeLabel: (nEdits ? nEdits + ' change' + (nEdits === 1 ? '' : 's') : 'No changes') + (fails ? ' · ' + fails + ' contrast ' + (fails === 1 ? 'check fails' : 'checks fail') : ''),
+      previewNote: (s.theme === 'light' ? 'Day' : 'Night') + ' theme · edits apply to this preview only until exported',
+      display: s.display, ui: s.ui, idxScale: s.idx, idxLabel: Math.round(72 * s.idx) + ' px at 72 px card',
+      setDisplay: (e) => this.setState({ display: e.target.value }),
+      setUi: (e) => this.setState({ ui: e.target.value }),
+      setIdx: (e) => this.setState({ idx: Number(e.target.value) }),
+      resetAll: () => this.setState({ edits: { light: {}, dark: {} }, display: 'Fraunces', ui: 'Instrument Sans', idx: 0.28 }),
+      feltCss: `background: ${col('felt')}; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 20px; font-family: ${uiF}; overflow: hidden`,
+      barCss: `background: ${col('felt-deep')}; color: ${col('on-felt')}`,
+      displayFont: `font-family: ${disp}`,
+      onFelt: `color: ${col('on-felt')}`, mutedOnFelt: `color: ${col('on-felt-muted')}`,
+      cells, founds, tab,
+      chromeCss: `background: ${col('surface')}; border: 1px solid #e2dccf; border-radius: 16px; padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-family: ${uiF}; box-shadow: inset 0 0 0 9999px transparent`,
+      ink: `color: ${col('ink')}`, inkMuted: `color: ${col('ink-muted')}`,
+      redChipCss: `display: inline-flex; align-items: center; height: 32px; padding: 0 10px; border-radius: 4px; background: ${col('surface-raised')}; color: ${col('suit-red-chrome')}; font-size: 13px; font-weight: 600`,
+      brassBtnCss: `min-height: 48px; padding: 0 18px; border: 0; border-radius: 10px; background: ${col('brass')}; color: ${col('on-brass')}; font-family: ${uiF}; font-size: 16px; font-weight: 600; cursor: pointer`,
+      exportJson: JSON.stringify(patch, null, 2),
+    };
+  }
+}
+</script>
+</body>
+</html>

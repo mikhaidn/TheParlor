@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Parlor Lab: drag and motion</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+button{font-family:inherit}
+input[type=range]{accent-color:#1f5b43}
+</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 900px; background: #f6f2e8; color: #1d1f1e; font-family: 'Instrument Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="background: #1d1f1e; color: #f4efe3; padding: 0 24px">
+    <div style="max-width: 1360px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; min-height: 64px">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <div style="font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">Parlor</div>
+        <span style="display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border-radius: 4px; background: #d4ad55; color: #2a2110; font-size: 12px; font-weight: 600; letter-spacing: 0.08em">LAB</span>
+      </div>
+      <nav aria-label="Lab sections" style="display: flex; gap: 4px; flex-wrap: wrap">
+        <a href="Lab.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; background: #34403a; color: #f4efe3; font-size: 15px; font-weight: 600; text-decoration: none">Drag &amp; motion</a>
+        <a href="LabTheme.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; color: #bcd2c5; font-size: 15px; font-weight: 600; text-decoration: none">Theme &amp; type</a>
+        <a href="#flags" style="display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; color: #bcd2c5; font-size: 15px; font-weight: 600; text-decoration: none">Flags</a>
+      </nav>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+        <span style="font-size: 13px; color: #bcd2c5; font-variant-numeric: tabular-nums">{{overrideLabel}}</span>
+        <label style="display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; color: #f4efe3; cursor: pointer">
+          <input type="checkbox" checked="{{applyToGames}}" onChange="{{toggleApply}}" style="width: 18px; height: 18px; accent-color: #d4ad55">
+          Apply to my games
+        </label>
+        <button type="button" onClick="{{resetAll}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #6b706a; background: transparent; color: #f4efe3; font-size: 15px; font-weight: 600; cursor: pointer">Reset all</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px">
+    <div style="max-width: 1360px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+      <section aria-labelledby="stage-h" style="flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+          <h1 id="stage-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 28px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em">Drag sandbox</h1>
+          <div style="font-size: 14px; line-height: 20px; color: #5b605c">Drag the 7 onto the 8 of clubs. Try the 9, or drop between columns. Tap twice to test double-tap.</div>
+        </div>
+
+        <div onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{cancel}}" style="position: relative; height: 560px; border-radius: 16px; background: #1f5b43; overflow: hidden; touch-action: none; user-select: none">
+          <sc-for list="{{cols}}" as="col" hint-placeholder-count="3">
+            <div style="{{col.slotCss}}"></div>
+            <div style="{{col.labelCss}}">{{col.label}}</div>
+            <sc-if value="{{col.showZone}}" hint-placeholder-val="{{ false }}">
+              <div style="{{col.zoneCss}}"></div>
+            </sc-if>
+          </sc-for>
+
+          <sc-for list="{{cards}}" as="c" hint-placeholder-count="5">
+            <div aria-label="{{c.name}}" style="{{c.css}}">
+              <div style="{{c.cornerCss}}">{{c.rank}}<svg width="{{c.pip}}" height="{{c.pip}}" viewBox="0 0 24 24" fill="{{c.ink}}" aria-hidden="true"><path d="{{c.d}}"></path></svg></div>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{showRing}}" hint-placeholder-val="{{ false }}">
+            <div aria-hidden="true" style="{{ringCss}}"></div>
+          </sc-if>
+
+          <button type="button" aria-label="{{mover.name}}" onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{cancel}}" style="{{mover.css}}">
+            <span style="{{mover.cornerCss}}">{{mover.rank}}<svg width="{{mover.pip}}" height="{{mover.pip}}" viewBox="0 0 24 24" fill="#b3261e" aria-hidden="true"><path d="{{mover.d}}"></path></svg></span>
+            <span style="{{mover.bigCss}}"><svg width="{{mover.big}}" height="{{mover.big}}" viewBox="0 0 24 24" fill="#b3261e" aria-hidden="true"><path d="{{mover.d}}"></path></svg></span>
+          </button>
+
+          <div aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+            <span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 4px; background: #17462f; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">{{readPointer}}</span>
+            <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 4px; background: #17462f; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">{{readDist}}</span>
+            <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 4px; background: #17462f; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">{{readHit}}</span>
+            <span style="flex-grow: 1"></span>
+            <span style="font-size: 14px; line-height: 20px; color: #f4efe3; font-weight: 600">{{result}}</span>
+            <button type="button" onClick="{{resetCard}}" style="min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #8fb9a3; background: transparent; color: #f4efe3; font-size: 14px; font-weight: 600; cursor: pointer">Put it back</button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; line-height: 20px">
+          <label style="display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer">
+            <input type="checkbox" checked="{{showZones}}" onChange="{{toggleZones}}" style="width: 18px; height: 18px; accent-color: #1f5b43">
+            Show drop zones
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer">
+            <input type="checkbox" checked="{{showRingPref}}" onChange="{{toggleRing}}" style="width: 18px; height: 18px; accent-color: #1f5b43">
+            Show drag threshold
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer">
+            <input type="checkbox" checked="{{reduceMotion}}" onChange="{{toggleReduce}}" style="width: 18px; height: 18px; accent-color: #1f5b43">
+            Simulate Reduce motion
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer">
+            <input type="checkbox" checked="{{slowMo}}" onChange="{{toggleSlow}}" style="width: 18px; height: 18px; accent-color: #1f5b43">
+            Slow motion ×5
+          </label>
+        </div>
+      </section>
+
+      <aside aria-labelledby="knobs-h" style="flex: 1 1 340px; min-width: 0; background: #ffffff; border-radius: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); padding: 20px; display: flex; flex-direction: column; gap: 18px">
+        <h2 id="knobs-h" style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; line-height: 26px; font-weight: 600">Tunables</h2>
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+          <section id="{{g.id}}" style="display: flex; flex-direction: column; gap: 12px">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">{{g.title}}</div>
+            <sc-for list="{{g.items}}" as="it" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="display: flex; align-items: baseline; gap: 8px">
+                  <label for="{{it.id}}" style="font-size: 15px; line-height: 20px; font-weight: 600">{{it.label}}</label>
+                  <sc-if value="{{it.isNew}}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; padding: 0 5px; border-radius: 4px; background: #e2dccf; color: #1d1f1e">NEW</span>
+                  </sc-if>
+                  <span style="margin-left: auto; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 600; {{it.valueCss}}">{{it.shown}}</span>
+                </div>
+                <sc-if value="{{it.isRange}}" hint-placeholder-val="{{ true }}">
+                  <input type="range" id="{{it.id}}" min="{{it.min}}" max="{{it.max}}" step="{{it.step}}" value="{{it.value}}" onChange="{{it.set}}" style="width: 100%; height: 28px; margin: 0">
+                </sc-if>
+                <sc-if value="{{it.isChoice}}" hint-placeholder-val="{{ false }}">
+                  <div id="{{it.id}}" role="group" aria-label="{{it.label}}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: #f6f2e8; border-radius: 10px; padding: 4px">
+                    <sc-for list="{{it.options}}" as="o" hint-placeholder-count="3">
+                      <button type="button" aria-pressed="{{o.on}}" onClick="{{o.pick}}" style="min-height: 36px; border: 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; {{o.css}}">{{o.label}}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div style="display: flex; gap: 8px; font-size: 12px; line-height: 16px; color: #5b605c">
+                  <span style="font-family: 'JetBrains Mono', ui-monospace, monospace">{{it.key}}</span>
+                  <span style="margin-left: auto">{{it.defLabel}}</span>
+                  <sc-if value="{{it.changed}}" hint-placeholder-val="{{ false }}">
+                    <button type="button" onClick="{{it.reset}}" style="border: 0; background: transparent; padding: 0; color: #1d1f1e; font-size: 12px; font-weight: 600; text-decoration: underline; cursor: pointer">Reset</button>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+
+        <section style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #e2dccf; padding-top: 16px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">EXPORT · OVERRIDES ONLY</div>
+            <button type="button" style="min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #7f847d; background: transparent; color: #1d1f1e; font-size: 14px; font-weight: 600; cursor: pointer">Copy JSON</button>
+          </div>
+          <pre style="margin: 0; padding: 12px; border-radius: 10px; background: #1d1f1e; color: #f4efe3; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; line-height: 18px; white-space: pre-wrap; overflow-x: auto">{{exportJson}}</pre>
+          <div style="font-size: 13px; line-height: 18px; color: #5b605c">Paste into a PR to make these the new defaults.</div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      v: { 'drag.threshold': 10, 'glide.ms': 240, 'lift.scale': 1.04 },
+      home: 'a', phase: 'idle', press: null, dx: 0, dy: 0, dist: 0, hit: null, overlap: 0,
+      pointer: 'mouse', result: 'Ready', lastUp: 0,
+      showZones: false, showRing: true, reduce: false, slow: false, apply: false,
+    };
+  }
+  defs() {
+    return [
+      { title: 'INPUT', items: [
+        { key: 'drag.threshold', label: 'Drag threshold', min: 0, max: 24, step: 1, def: 6, unit: ' px' },
+        { key: 'tap.doubleMs', label: 'Double-tap window', min: 150, max: 700, step: 10, def: 400, unit: ' ms' },
+        { key: 'drop.rule', label: 'Drop target', def: 'overlap', options: [['overlap', 'Most overlap'], ['pointer', 'Under finger'], ['nearest', 'Nearest']] },
+      ]},
+      { title: 'MOTION', items: [
+        { key: 'glide.ms', label: 'Glide to pile', min: 0, max: 600, step: 10, def: 180, unit: ' ms' },
+        { key: 'glide.easing', label: 'Glide easing', def: 'ease-out', options: [['ease-out', 'Ease out'], ['overshoot', 'Overshoot'], ['linear', 'Linear']] },
+        { key: 'lift.y', label: 'Lift height', min: 0, max: 16, step: 1, def: 6, unit: ' px' },
+        { key: 'lift.tilt', label: 'Lift tilt', min: -8, max: 8, step: 0.5, def: -2, unit: '°' },
+        { key: 'lift.scale', label: 'Lift scale', min: 1, max: 1.12, step: 0.01, def: 1, unit: '×', isNew: true },
+      ]},
+      { title: 'LAYOUT', items: [
+        { key: 'card.width', label: 'Card width', min: 34, max: 112, step: 1, def: 72, unit: ' px' },
+        { key: 'card.fan', label: 'Fan offset', min: 14, max: 40, step: 1, def: 26, unit: ' px' },
+        { key: 'col.gap', label: 'Column gap', min: 4, max: 48, step: 1, def: 12, unit: ' px' },
+      ]},
+      { title: 'FLAGS', id: 'flags', items: [
+        { key: 'share.format', label: 'Share text', def: 'squares', options: [['squares', 'Squares'], ['bars', 'Bars'], ['short', 'One line']] },
+        { key: 'packs.paid', label: 'Paid packs', def: 'hidden', options: [['hidden', 'Hidden'], ['preview', 'Preview'], ['unlocked', 'Unlocked']], isNew: true },
+      ]},
+    ];
+  }
+  val(key) {
+    for (const g of this.defs()) for (const it of g.items) if (it.key === key) return this.state.v[key] ?? it.def;
+  }
+  setVal(key, value) { this.setState({ v: { ...this.state.v, [key]: value } }); }
+  clearVal(key) { const v = { ...this.state.v }; delete v[key]; this.setState({ v }); }
+
+  geo() {
+    const cw = this.val('card.width'), ch = Math.round(cw * 1.4), fan = this.val('card.fan'), gap = this.val('col.gap');
+    const x0 = 40, top = 64;
+    const xs = [0, 1, 2].map((i) => x0 + i * (cw + gap * 3));
+    const piles = { a: 2, b: 2, c: 2 };
+    return { cw, ch, fan, gap, xs, top, piles };
+  }
+  homeXY(g, home) {
+    const i = { a: 0, b: 1, c: 2 }[home];
+    return { x: g.xs[i], y: g.top + g.fan * g.piles[home] };
+  }
+  hitTest(g, x, y, px, py) {
+    const rule = this.val('drop.rule');
+    let best = null, bestScore = 0;
+    ['a', 'b', 'c'].forEach((id, i) => {
+      if (id === this.state.home) return;
+      const r = { l: g.xs[i], t: g.top, r: g.xs[i] + g.cw, b: g.top + g.ch + g.fan * g.piles[id] };
+      let score = 0;
+      if (rule === 'pointer') score = px >= r.l && px <= r.r && py >= r.t && py <= r.b ? 1 : 0;
+      else if (rule === 'nearest') { const d = Math.hypot(x + g.cw / 2 - (r.l + g.cw / 2), y - (r.b - g.ch)); score = d < g.cw * 1.6 ? 1 / (1 + d) : 0; }
+      else { const w = Math.min(x + g.cw, r.r) - Math.max(x, r.l), h = Math.min(y + g.ch, r.b) - Math.max(y, r.t); score = w > 0 && h > 0 ? (w * h) / (g.cw * g.ch) : 0; }
+      if (score > bestScore) { bestScore = score; best = id; }
+    });
+    return { id: best, overlap: rule === 'overlap' ? bestScore : null };
+  }
+
+  renderVals() {
+    const s = this.state, g = this.geo();
+    const SUIT = {
+      h: 'M12 21s-7.5-4.6-9.6-9.1C.9 8.6 2.9 4.5 6.6 4.5c2.2 0 3.7 1.3 4.4 2.6.7-1.3 2.2-2.6 4.4-2.6 3.7 0 5.7 4.1 4.2 7.4C19.5 16.4 12 21 12 21z',
+      s: 'M12 2s-8 6-8 11a4 4 0 0 0 7 2.6V18l-2 3h6l-2-3v-2.4A4 4 0 0 0 20 13c0-5-8-11-8-11z',
+      d: 'M12 2l8 10-8 10-8-10z',
+      c: 'M12 3a3.8 3.8 0 0 1 3.6 5A3.8 3.8 0 1 1 13.4 15l1.1 6h-5l1.1-6a3.8 3.8 0 1 1-2.2-7A3.8 3.8 0 0 1 12 3z',
+    };
+    const RED = { h: 1, d: 1 };
+    const pip = Math.max(10, Math.round(g.cw * 0.22)), idx = Math.max(12, Math.round(g.cw * 0.28));
+    const piles = { a: [['K', 'd'], ['10', 'c']], b: [['Q', 'h'], ['8', 'c']], c: [['J', 's'], ['9', 'd']] };
+    const cardBase = (x, y) => `position: absolute; left: ${x}px; top: ${y}px; width: ${g.cw}px; height: ${g.ch}px; box-sizing: border-box; border-radius: ${Math.round(g.cw * 0.083)}px; background: #fbf7ec; box-shadow: 0 0 0 1px #d6ccb6 inset, 0 1px 2px rgba(0,0,0,0.28)`;
+    const cornerCss = `position: absolute; left: ${Math.round(g.cw * 0.08)}px; right: ${Math.round(g.cw * 0.08)}px; top: ${Math.round(g.cw * 0.06)}px; display: flex; justify-content: space-between; align-items: center; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: ${idx}px; line-height: ${idx}px`;
+
+    const cols = ['a', 'b', 'c'].map((id, i) => {
+      const valid = id === 'b';
+      const hover = s.phase === 'dragging' && s.hit === id;
+      const ring = hover ? (valid ? '0 0 0 3px #f4d27a' : '0 0 0 3px #e5685d') : '0 0 0 1px #8fb9a3 inset';
+      const zoneH = g.ch + g.fan * g.piles[id];
+      return {
+        label: ['Column 1', 'Column 2 · valid', 'Column 3 · not valid'][i],
+        slotCss: `position: absolute; left: ${g.xs[i]}px; top: ${g.top}px; width: ${g.cw}px; height: ${g.ch}px; box-sizing: border-box; border-radius: ${Math.round(g.cw * 0.083)}px; background: #17462f; box-shadow: ${ring}`,
+        labelCss: `position: absolute; left: ${g.xs[i]}px; top: 24px; width: ${g.cw + g.gap * 3}px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.04em; color: #bcd2c5; white-space: nowrap`,
+        showZone: s.showZones && id !== s.home,
+        zoneCss: `position: absolute; left: ${g.xs[i]}px; top: ${g.top}px; width: ${g.cw}px; height: ${zoneH}px; box-sizing: border-box; border: 2px dashed ${valid ? '#f4d27a' : '#e5685d'}; border-radius: 8px; background: rgba(244,210,122,0.08); pointer-events: none; z-index: 3`,
+      };
+    });
+
+    const cards = [];
+    Object.keys(piles).forEach((id, i) => piles[id].forEach(([rank, suit], k) => {
+      const ink = RED[suit] ? '#b3261e' : '#1d1f1e';
+      const ringed = s.phase === 'dragging' && s.hit === id && k === piles[id].length - 1;
+      cards.push({
+        name: rank + ' of ' + { h: 'hearts', s: 'spades', d: 'diamonds', c: 'clubs' }[suit], rank, ink, d: SUIT[suit], pip,
+        css: cardBase(g.xs[i], g.top + g.fan * k) + (ringed ? (id === 'b' ? ', 0 0 0 3px #f4d27a' : ', 0 0 0 3px #e5685d') : '') + `; color: ${ink}; z-index: ${k + 1}`,
+        cornerCss,
+      });
+    }));
+
+    // the moving 7 of hearts
+    const home = this.homeXY(g, s.home);
+    const dragging = s.phase === 'dragging';
+    const slow = s.slow ? 5 : 1;
+    const ms = s.reduce ? 0 : this.val('glide.ms') * slow;
+    const ease = { 'ease-out': 'ease-out', overshoot: 'cubic-bezier(0.2, 1.5, 0.4, 1)', linear: 'linear' }[this.val('glide.easing')];
+    const lift = dragging && !s.reduce ? `translateY(${-this.val('lift.y')}px) rotate(${this.val('lift.tilt')}deg) scale(${this.val('lift.scale')})` : 'none';
+    const shadow = dragging ? '0 0 0 1px #d6ccb6 inset, 0 10px 22px rgba(0,0,0,0.38)' : '0 0 0 1px #d6ccb6 inset, 0 1px 2px rgba(0,0,0,0.28)';
+    const big = Math.round(g.cw * 0.5);
+    const mover = {
+      name: '7 of hearts, draggable', rank: '7', d: SUIT.h, pip, big, cornerCss,
+      css: `position: absolute; left: ${home.x + s.dx}px; top: ${home.y + s.dy}px; width: ${g.cw}px; height: ${g.ch}px; box-sizing: border-box; padding: 0; border: 0; border-radius: ${Math.round(g.cw * 0.083)}px; background: #fbf7ec; color: #b3261e; box-shadow: ${shadow}${s.selected ? ', 0 0 0 3px #d4ad55' : ''}; transform: ${lift}; transition: ${dragging || s.phase === 'pressed' ? `transform ${80 * slow}ms ease-out` : `left ${ms}ms ${ease}, top ${ms}ms ${ease}, transform ${ms}ms ${ease}, box-shadow ${ms}ms ${ease}`}; z-index: 10; cursor: ${dragging ? 'grabbing' : 'grab'}; touch-action: none`,
+      bigCss: `position: absolute; inset: ${Math.round(g.cw * 0.4)}px 0 ${Math.round(g.cw * 0.2)}px; display: flex; align-items: center; justify-content: center`,
+    };
+
+    const thr = this.val('drag.threshold');
+    const ringCss = s.press ? `position: absolute; left: ${s.press.sx - thr}px; top: ${s.press.sy - thr}px; width: ${thr * 2}px; height: ${thr * 2}px; box-sizing: border-box; border-radius: 50%; border: 2px dashed #f4d27a; background: rgba(244,210,122,0.18); pointer-events: none; z-index: 12` : '';
+
+    const down = (e) => {
+      if (s.phase === 'dragging') return;
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      const r = e.currentTarget.getBoundingClientRect();
+      const ox = e.clientX - r.left, oy = e.clientY - r.top;
+      this.setState({ press: { x: e.clientX, y: e.clientY, id: e.pointerId, ox, oy, sx: home.x + ox, sy: home.y + oy }, phase: 'pressed', dx: 0, dy: 0, dist: 0, hit: null, overlap: 0, pointer: e.pointerType || 'mouse' });
+    };
+    const move = (e) => {
+      const p = this.state.press;
+      if (!p || e.pointerId !== p.id) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y, dist = Math.hypot(dx, dy);
+      if (this.state.phase === 'pressed' && dist < this.val('drag.threshold')) { this.setState({ dist }); return; }
+      const h = this.hitTest(g, home.x + dx, home.y + dy, home.x + p.ox + dx, home.y + p.oy + dy);
+      this.setState({ phase: 'dragging', dx, dy, dist, hit: h.id, overlap: h.overlap, selected: false });
+    };
+    const up = (e) => {
+      const st = this.state, p = st.press;
+      if (!p || e.pointerId !== p.id) return;
+      if (st.phase === 'dragging') {
+        let next = { home: st.home, result: 'No pile under it: back it goes' };
+        if (st.hit === 'b') next = { home: 'b', result: 'Moved to column 2' };
+        else if (st.hit === 'c') next = { home: st.home, result: 'Can’t move: 7♥ doesn’t go on 9♦' };
+        else if (st.hit === 'a') next = { home: 'a', result: 'Moved to column 1' };
+        this.setState({ ...next, press: null, phase: 'idle', dx: 0, dy: 0 });
+      } else {
+        const now = performance.now(), gapMs = Math.round(now - st.lastUp);
+        const isDouble = gapMs < this.val('tap.doubleMs');
+        this.setState({ press: null, phase: 'idle', lastUp: isDouble ? 0 : now, selected: !isDouble && !st.selected,
+          result: isDouble ? `Double-tap (${gapMs} ms): sends home` : st.lastUp ? `Tap (${gapMs} ms since last): select` : 'Tap: select' });
+      }
+    };
+    const cancel = () => this.setState({ press: null, phase: 'idle', dx: 0, dy: 0, result: 'Pointer cancelled: back home' });
+
+    const groups = this.defs().map((grp) => ({
+      title: grp.title, id: grp.id || 'g-' + grp.title.toLowerCase(),
+      items: grp.items.map((it) => {
+        const value = this.val(it.key), changed = it.key in s.v && s.v[it.key] !== it.def;
+        const fmt = (x) => (it.step && it.step < 1 ? Number(x).toFixed(it.step < 0.1 ? 2 : 1) : x) + (it.unit || '');
+        const optLabel = (x) => (it.options ? (it.options.find((o) => o[0] === x) || [x, x])[1] : fmt(x));
+        return {
+          ...it, value, changed, isNew: !!it.isNew, isRange: !it.options, isChoice: !!it.options,
+          id: 'k-' + it.key.replace('.', '-'),
+          shown: optLabel(value),
+          valueCss: changed ? 'color: #1f5b43; background: #e7efe9; padding: 0 6px; border-radius: 4px' : 'color: #1d1f1e',
+          defLabel: 'default ' + optLabel(it.def),
+          set: (e) => this.setVal(it.key, Number(e.target.value)),
+          reset: () => this.clearVal(it.key),
+          options: (it.options || []).map(([id, label]) => ({
+            label, on: value === id,
+            css: value === id ? 'background: #ffffff; color: #1d1f1e; box-shadow: 0 1px 2px rgba(29,31,30,0.16)' : 'background: transparent; color: #5b605c',
+            pick: () => this.setVal(it.key, id),
+          })),
+        };
+      }),
+    }));
+
+    const ov = {};
+    this.defs().forEach((grp) => grp.items.forEach((it) => { if (it.key in s.v && s.v[it.key] !== it.def) ov[it.key] = s.v[it.key]; }));
+    const n = Object.keys(ov).length;
+
+    return {
+      cols, cards, mover, down, move, up, cancel, groups,
+      showRing: s.showRing && !!s.press, ringCss,
+      readPointer: `${s.pointer} · ${s.phase}`,
+      readDist: `moved ${s.dist.toFixed(1)} / ${thr} px`,
+      readHit: s.phase === 'dragging' ? (s.hit ? `→ column ${{ a: 1, b: 2, c: 3 }[s.hit]}${s.overlap != null ? ' · ' + Math.round(s.overlap * 100) + '% overlap' : ''}` : '→ no pile') : 'target —',
+      result: s.result,
+      resetCard: () => this.setState({ home: 'a', result: 'Ready', selected: false }),
+      resetAll: () => this.setState({ v: {}, result: 'Defaults restored' }),
+      overrideLabel: n ? `${n} override${n === 1 ? '' : 's'} · ${s.apply ? 'on in my games too' : 'sandbox only'}` : 'No overrides',
+      exportJson: JSON.stringify({ app: 'parlor', lab: 1, overrides: ov }, null, 2),
+      showZones: s.showZones, showRingPref: s.showRing, reduceMotion: s.reduce, slowMo: s.slow, applyToGames: s.apply,
+      toggleZones: () => this.setState({ showZones: !s.showZones }),
+      toggleRing: () => this.setState({ showRing: !s.showRing }),
+      toggleReduce: () => this.setState({ reduce: !s.reduce }),
+      toggleSlow: () => this.setState({ slow: !s.slow }),
+      toggleApply: () => this.setState({ apply: !s.apply }),
+    };
+  }
+}
+</script>
+</body>
+</html>

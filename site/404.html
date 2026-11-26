@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Not found — Parlor</title>
+<title data-copy="pages.notFoundTitle">Not found — Parlor</title>
 <style>
   body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #1f5b43; color: #f4efe3; font: 400 17px/24px system-ui, sans-serif; text-align: center; padding: 24px; }
   h1 { font: 600 34px/38px Georgia, serif; margin: 0 0 8px; }
@@ -12,13 +12,19 @@
 </head>
 <body>
 <main>
-  <h1>No card here</h1>
-  <p>That page isn’t on the table. <a id="home" href="./">Back to Parlor</a></p>
+  <h1 data-copy="pages.notFoundHeading">No card here</h1>
+  <p><span data-copy="pages.notFoundBody">That page isn’t on the table.</span> <a id="home" href="./" data-copy="pages.notFoundHome">Back to Parlor</a></p>
 </main>
 <script>
   // GitHub Pages serves this for any missing path; send people to the app root of this site.
   var seg = location.pathname.split('/').filter(Boolean);
-  if (location.hostname.endsWith('github.io') && seg.length) document.getElementById('home').href = '/' + seg[0] + '/';
+  var root = location.hostname.endsWith('github.io') && seg.length ? '/' + seg[0] + '/' : './';
+  document.getElementById('home').href = root;
+  // Same words as the app: fill from copy/en.json when it's reachable (the English above is the fallback).
+  fetch(root + 'copy/en.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (c) {
+    if (!c || !c.pages) return;
+    document.querySelectorAll('[data-copy]').forEach(function (el) { var k = el.getAttribute('data-copy').split('.'); var v = c[k[0]] && c[k[0]][k[1]]; if (typeof v === 'string') el.textContent = v; });
+  }).catch(function () {});
 </script>
 </body>
 </html>

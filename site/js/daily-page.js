@@ -5,16 +5,19 @@
 //   #stats[=N]   Stats & calendar (design/daily/Calendar.dc.html), day N selected
 //   #day=N       Solved screen for a past day
 //   #play=N      play a past day's deal (a late solve: counts toward Solved, not the streak)
-//   #replay[=N]  practice a deal; never changes a recorded result
+//   #replay[=N]  practice a deal ("Play again"); never changes a recorded result
+//   #r=CODE      a shared replay (site/js/replay-view.js): locked until you've solved that Daily
 // All text comes from copy/en.json via t().
 
 import { boot, P } from './boot.js';
 import { mountGame, toast } from './table.js';
 import { read, formatTime, persist } from './store.js';
 import { track } from './analytics.js';
-import { t, tp } from './strings.js';
+import { t, tp, dsText } from './strings.js';
 import { dailyNumber, dateOf, dealFor, formatDate, msUntilNextDaily, records, markStarted, saveResult, summary, dayStatus, shareText, shareLink, shareCaption, SHARE_FORMAT } from './daily.js';
-import { copyText, canShareNatively, shareTextNatively, saveImage } from './share.js';
+import { copyText, canShareNatively, shareTextNatively, saveImage, qrSvg } from './share.js';
+import { mountReplay, takeStartLog } from './replay-view.js';
+import { read as readStore, write as writeStore } from './store.js';
 
 /** Set to a Stripe Payment Link (or similar) to show "Tip the table". */
 const TIP_URL = null;
@@ -70,6 +73,7 @@ function teardown() {
 function route() {
   today = dailyNumber();
   const [name, arg] = location.hash.replace('#', '').split('=');
+  if (name === 'r') { teardown(); scrollTo(0, 0); game = mountReplay(view, arg, { today, backHref: backFromReplay(arg) }); return; }
   const n = parseInt(arg, 10);
   const solved = (k) => !!records().results[k]?.solved;
   teardown();
@@ -84,6 +88,13 @@ function route() {
     case 'stats': return calendar(n);
     default: return todayView();
   }
+}
+
+/** Where a replay's Back goes: your own result if it's your replay, else Today. */
+function backFromReplay(code) {
+  const r = records();
+  for (const [n, rec] of Object.entries(r.results)) if (rec.code && rec.code === code) return +n === today ? '#solved' : `#day=${n}`;
+  return '#';
 }
 
 // ---------- Today ----------
@@ -103,7 +114,7 @@ function todayView() {
 
   view.append(h('main', { class: 'pa-page pd-today' },
     h('header', { class: 'pa-head' },
-      h('a', { class: 'pa-brand', href: '../', 'aria-label': t('common.allGames') }, h('span', { class: 'pa-suite-title' }, 'Parlor')),
+      h('a', { class: 'pa-brand', href: '../', 'aria-label': t('common.allGames') }, h('span', { class: 'pa-suite-title' }, t('pages.brand'))),
       h('a', { class: 'pa-icon-link', href: '#stats' }, svgIcon(ICON.stats), t('daily.stats'))),
     h('section', { class: 'pd-hero', 'aria-labelledby': 'pd-title' },
       h('div', { class: 'pd-hero-text' },
@@ -129,15 +140,19 @@ function todayView() {
 function play(n, mode) {
   document.body.classList.add('on-felt');
   const deal = dealFor(n);
-  const host = h('main', { 'aria-label': 'FreeCell' });
+  const host = h('main', { 'aria-label': t('common.freecell') });
   view.append(host);
   const back = mode === 'today' ? '' : mode === 'late' ? `stats=${n}` : n === today ? 'solved' : `day=${n}`;
   const backLabel = mode === 'today' || (mode === 'practice' && n === today) ? t('daily.backToToday') : t('daily.backToStats');
+  const startLog = mode === 'practice' ? takeStartLog(n) : null;
   game = mountGame(host, {
     rulesId: 'parlor.rules.freecell',
     deal,
-    title: 'FreeCell',
-    dealLabel: t(mode === 'practice' ? 'daily.barPractice' : mode === 'late' ? 'daily.barLate' : 'daily.barDeal', { n }),
+    daily: n,
+    restartInMenu: true,
+    startLog,
+    title: t('common.freecell'),
+    dealLabel: t(startLog ? 'replay.practiceBar' : mode === 'practice' ? 'daily.barPractice' : mode === 'late' ? 'daily.barLate' : 'daily.barDeal', { n }),
     storageKey: mode === 'today' ? TODAY_KEY : mode === 'late' ? PAST_KEY : PRACTICE_KEY,
     resume: mode !== 'practice',
     onStart: () => {
@@ -164,7 +179,7 @@ function play(n, mode) {
 // ---------- Solved ----------
 function gridRows(rec, size) {
   return ['spades', 'hearts', 'diamonds', 'clubs'].map((suit) =>
-    h('div', { class: 'pd-row' }, P.Suit({ suit, size, label: suit }), h('div', { class: 'pd-cells' }, rec.grid[suit].map((q) => h('i', { 'data-q': q })))));
+    h('div', { class: 'pd-row' }, P.Suit({ suit, size, label: dsText(suit) }), h('div', { class: 'pd-cells' }, rec.grid[suit].map((q) => h('i', { 'data-q': q })))));
 }
 
 function result(n) {
@@ -176,12 +191,13 @@ function result(n) {
   const backLabel = isToday ? t('daily.backToToday') : t('daily.backToStats');
   const note = isToday ? h('div', { class: 'pd-muted' }, t('common.nextDealIn', { time: nextIn() })) : null;
   const streakLine = isToday && s.streak > 1 ? t('daily.streakLine', { count: s.streak }) : null;
-  const badge = rec.late ? h('div', { class: 'pd-best' }, t('daily.lateLine'))
+  const badge = rec.watched ? h('div', { class: 'pd-best' }, t('calendar.watchedNote'))
+    : rec.late ? h('div', { class: 'pd-best' }, t('daily.lateLine'))
     : isBest || streakLine ? h('div', { class: 'pd-best' }, isBest ? h('span', { class: 'pd-chip' }, t('daily.newBest')) : null, streakLine) : null;
 
   view.append(h('div', { class: 'pd-result' },
     h('div', { class: 'pd-result-bar' },
-      h('div', {}, h('b', {}, 'FreeCell '), h('span', {}, '· ' + t('daily.barDeal', { n }))),
+      h('div', {}, h('b', {}, t('common.freecell') + ' '), h('span', {}, '· ' + t('daily.barDeal', { n }))),
       h('a', { class: 'pd-x', href: isToday ? '#' : `#stats=${n}`, 'aria-label': backLabel }, svgIcon(ICON.close))),
     h('main', { class: 'pd-result-body' },
       h('div', { class: 'pd-headline' }, h('h1', {}, t('daily.solvedTitle')), h('p', {}, t('daily.solvedSub', { deal: dealFor(n), date: longDate(n) }))),
@@ -196,6 +212,7 @@ function result(n) {
         h('p', {}, t('daily.gridCaption'))),
       h('div', { class: 'pd-actions' },
         h('button', { class: 'pa-btn pa-btn-primary', type: 'button', onclick: () => openShare(n, rec, s.streak) }, svgIcon(ICON.share), t('daily.share')),
+        rec.code ? h('a', { class: 'pa-btn pa-btn-felt', href: `#r=${rec.code}` }, t('daily.watchReplay')) : null,
         h('a', { class: 'pa-btn pa-btn-felt', href: isToday ? '#replay' : `#replay=${n}` }, t('daily.replay')),
         note))));
   if (note) countdown = setInterval(() => { note.textContent = t('common.nextDealIn', { time: nextIn() }); }, 30000);
@@ -251,7 +268,7 @@ function renderCalendar() {
           h('button', { type: 'button', class: 'pd-icon-btn', 'aria-label': t('calendar.next'), disabled: atLast, onclick: () => step(1) }, svgIcon(ICON.next)))),
       h('div', { class: 'pd-cal-grid pd-cal-dow', 'aria-hidden': 'true' }, weekdays.map((w) => h('div', {}, w))),
       h('div', { class: 'pd-cal-grid' }, cells),
-      h('div', { class: 'pd-legend' }, ['solved', 'missed', 'none', 'today'].map((k) => h('div', {}, h('span', { 'data-state': k }), t('calendar.legend.' + k))))),
+      h('div', { class: 'pd-legend' }, ['solved', 'missed', 'none', 'watched', 'today'].map((k) => h('div', {}, h('span', { 'data-state': k }), t('calendar.legend.' + k))))),
     dayDetail(cal.sel, r)));
   if (focused) view.querySelector(`[aria-label="${CSS.escape(focused)}"]`)?.focus();
 }
@@ -260,7 +277,7 @@ function dayDetail(n, r) {
   const st = dayStatus(n, today, r);
   const rec = r.results[n];
   const deal = dealFor(n);
-  const chip = st === 'solved' && rec.late ? 'late' : st;
+  const chip = st === 'solved' && rec.watched ? 'watched' : st === 'solved' && rec.late ? 'late' : st;
   const g = read(n === today ? TODAY_KEY : PAST_KEY);
   const inProgress = g && g.deal === deal && g.moves?.length && !g.won;
   const kids = [h('div', { class: 'pd-detail-head' },
@@ -275,11 +292,11 @@ function dayDetail(n, r) {
     kids.push(h('div', { class: 'pd-detail-actions' },
       h('a', { class: 'pa-btn pa-btn-outline', href: n === today ? '#solved' : `#day=${n}` }, t('calendar.seeResult')),
       h('a', { class: 'pa-btn pa-btn-outline', href: n === today ? '#replay' : `#replay=${n}` }, t('calendar.replay'))));
-  } else if (st === 'today') {
-    kids.push(h('p', { class: 'pd-detail-note' }, t('calendar.todayNote')));
+  } else if (st === 'today' || (st === 'watched' && n === today)) {
+    kids.push(h('p', { class: 'pd-detail-note' }, t(st === 'watched' ? 'calendar.watchedNote' : 'calendar.todayNote')));
     kids.push(h('a', { class: 'pa-btn pa-btn-primary', href: '#play' }, inProgress ? t('daily.continue') : t('calendar.todayPlay')));
   } else {
-    kids.push(h('p', { class: 'pd-detail-note' }, t(st === 'missed' ? 'calendar.missedNote' : 'calendar.noneNote')));
+    kids.push(h('p', { class: 'pd-detail-note' }, t(st === 'missed' ? 'calendar.missedNote' : st === 'watched' ? 'calendar.watchedNote' : 'calendar.noneNote')));
     kids.push(h('a', { class: 'pa-btn pa-btn-primary', href: `#play=${n}` }, inProgress ? t('calendar.continue') : t('calendar.play')));
     kids.push(h('p', { class: 'pd-detail-rule' }, t('calendar.lateRule')));
   }
@@ -287,9 +304,23 @@ function dayDetail(n, r) {
 }
 
 // ---------- Share sheet (design/daily/CopyShare.dc.html) ----------
+const REPLAY_PREF = 'parlor.share.replay';
+
 function openShare(n, rec, streak) {
   const link = shareLink(new URL('./?ref=share', location.href).href);
-  const text = shareText(n, rec, link, SHARE_FORMAT);
+  const baseText = shareText(n, rec, link, SHARE_FORMAT);
+  // The replay link is opt-in and remembered. It shows the solve, so it's locked for anyone
+  // who hasn't solved that Daily (site/js/replay-view.js).
+  const replayUrl = rec.code ? new URL(`./?ref=replay#r=${rec.code}`, location.href).href : null;
+  let withReplay = !!replayUrl && readStore(REPLAY_PREF, false) === true;
+  let text = baseText;
+  const preview = h('div', { class: 'pd-share-preview', tabindex: '0', 'aria-label': t('share.previewLabel') });
+  const qrBox = h('div', { class: 'pd-share-qr' });
+  const setText = () => {
+    text = withReplay ? baseText + '\n' + t('share.text.replayLine', { link: shareLink(replayUrl) }) : baseText;
+    preview.textContent = text;
+    qrBox.hidden = !withReplay;
+  };
   const label = h('span', {}, t('share.copy'));
   const icon = svgIcon(ICON.copy);
   let close;
@@ -312,15 +343,35 @@ function openShare(n, rec, streak) {
     if (how === 'downloaded') toast(t('share.imageSaved'));
   } }, svgIcon(ICON.image), t('share.image'));
 
+  let replayRow = null;
+  if (replayUrl) {
+    const labelId = 'pd-share-replay-label';
+    replayRow = h('div', { class: 'pd-share-toggle' },
+      h('div', { class: 'pd-share-toggle-text' },
+        h('span', { id: labelId, class: 'pd-share-toggle-label' }, t('share.addReplay')),
+        h('span', { class: 'pd-share-toggle-help' }, t('share.addReplayHelp'))),
+      P.Toggle({ checked: withReplay, labelledBy: labelId, onChange: (v) => { withReplay = v; writeStore(REPLAY_PREF, v); setText(); } }));
+    qrBox.append(
+      h('div', { class: 'pd-share-qr-code' }),
+      h('div', { class: 'pd-share-qr-text' },
+        h('b', {}, t('share.inPerson')),
+        h('span', {}, t('share.inPersonHelp')),
+        h('a', { class: 'pa-btn pa-btn-outline', href: `#r=${rec.code}`, onclick: () => close() }, t('share.openReplay'))));
+    qrSvg(replayUrl, t('share.qrLabel')).then((svg) => { if (svg) qrBox.firstChild.replaceChildren(svg); else qrBox.firstChild.remove(); });
+  }
+  setText();
+
   const caption = shareCaption();
   close = P.openSheet(P.Sheet({
     title: t('share.title'),
     className: 'pd-share',
     children: [
-      h('div', { class: 'pd-share-preview', tabindex: '0', 'aria-label': t('share.previewLabel') }, text),
+      preview,
       caption ? h('p', { class: 'pl-caption pd-share-caption' }, caption) : null,
+      replayRow,
       copyBtn,
       h('div', { class: 'pd-share-row' + (native ? '' : ' is-single') }, native, image),
+      replayUrl ? qrBox : null,
     ],
     onClose: () => close(),
   }));

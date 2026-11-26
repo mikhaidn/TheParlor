@@ -13,6 +13,18 @@ const site = join(root, 'site');
 
 await import('./build-tokens.mjs');
 
+// The installed app's name and shortcuts come from copy/en.json (app.*), like every other word.
+{
+  const app = JSON.parse(readFileSync(join(site, 'copy', 'en.json'), 'utf8')).app;
+  const mPath = join(site, 'manifest.webmanifest');
+  const m = JSON.parse(readFileSync(mPath, 'utf8'));
+  Object.assign(m, { name: app.name, short_name: app.shortName, description: app.description });
+  const [daily, freecell] = m.shortcuts;
+  Object.assign(daily, { name: app.shortcutDaily, short_name: app.shortcutDailyShort });
+  Object.assign(freecell, { name: app.shortcutFreecell });
+  writeFileSync(mPath, JSON.stringify(m, null, 2) + '\n');
+}
+
 let build = process.argv[2];
 if (!build) { try { build = execSync('git rev-parse --short HEAD', { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { build = 'dev'; } }
 
