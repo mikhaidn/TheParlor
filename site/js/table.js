@@ -12,6 +12,7 @@ import { createEngine } from './engine.js';
 import { read, write, remove, formatTime } from './store.js';
 import { P, getSettings, setSettings } from './boot.js';
 import { statsGroup } from './stats-file.js';
+import { t } from './strings.js';
 
 const DRAG_THRESHOLD = 6;
 const DOUBLE_TAP_MS = 400;
@@ -51,6 +52,9 @@ export function openSettings(onChange) {
     onChange: (next) => { setSettings(next); onChange && onChange(); },
     onClose: () => close(),
   });
+  // The design system's own help text, overridden from copy/en.json.
+  const help = panel.querySelector('.pl-set-file .pl-set-help');
+  if (help) help.textContent = t('designSystem.settingsFileHelp');
   panel.querySelector('.pl-sheet-body')?.appendChild(statsGroup(P));
   close = P.openSheet(panel);
 }
@@ -150,12 +154,12 @@ export function mountGame(host, o) {
   function render(rects) {
     const s = getSettings();
     const stats = [];
-    if (s.play.showTimer) stats.push({ label: 'Time', value: formatTime(now()) });
-    if (s.play.showMoves) stats.push({ label: 'Moves', value: moves.length });
+    if (s.play.showTimer) stats.push({ label: t('common.time'), value: formatTime(now()) });
+    if (s.play.showMoves) stats.push({ label: t('common.moves'), value: moves.length });
     const actions = [
-      { label: 'Undo', onClick: undo, disabled: !moves.length || won },
-      s.play.hints ? { label: 'Hint', onClick: showHint, disabled: won } : null,
-      { label: 'Menu', onClick: openMenu },
+      { label: t('common.undo'), onClick: undo, disabled: !moves.length || won },
+      s.play.hints ? { label: t('common.hint'), onClick: showHint, disabled: won } : null,
+      { label: t('common.menu'), onClick: openMenu },
     ].filter(Boolean);
 
     const table = P.FreeCellTable({
@@ -165,12 +169,12 @@ export function mountGame(host, o) {
       hint: hint ? hint.to : null,
       leftHanded: s.play.leftHanded,
       cardSize: s.appearance.cardSize,
-      bar: { game: o.title || engine.name, deal: o.dealLabel || 'Deal #' + deal, stats, actions },
+      bar: { game: o.title || engine.name, deal: o.dealLabel || t('table.dealLabel', { deal }), stats, actions },
     });
     host.replaceChildren(table);
     timeEl = null;
     table.querySelectorAll('.pl-stat').forEach((st) => {
-      if (st.querySelector('.pl-stat-label')?.textContent === 'Time') timeEl = st.querySelector('.pl-stat-value');
+      if (st.querySelector('.pl-stat-label')?.textContent === t('common.time')) timeEl = st.querySelector('.pl-stat-value');
     });
     table.querySelectorAll('[data-pile]').forEach((el) => {
       el.tabIndex = 0;
@@ -246,9 +250,9 @@ export function mountGame(host, o) {
   function stuck() {
     let close;
     const sheet = P.Sheet({
-      title: 'No more moves',
-      children: [para('Undo a few moves to try another way, or start fresh.')],
-      footer: [btn('Undo', () => { close(); undo(); }, 'primary'), btn(o.newGameLabel || 'New game', () => { close(); o.onNewGame ? o.onNewGame() : newDeal(); })],
+      title: t('table.stuckTitle'),
+      children: [para(t('table.stuckBody'))],
+      footer: [btn(t('common.undo'), () => { close(); undo(); }, 'primary'), btn(o.newGameLabel || t('common.newGame'), () => { close(); o.onNewGame ? o.onNewGame() : newDeal(); })],
       onClose: () => close(),
     });
     close = P.openSheet(sheet);
@@ -274,9 +278,9 @@ export function mountGame(host, o) {
 
   function openMenu() {
     const items = o.menu ? o.menu(ctl) : [];
-    menuSheet('Menu', items.concat([
-      { label: 'How to play', onClick: () => openRules('freecell') },
-      { label: 'Settings', onClick: () => openSettings(() => render()) },
+    menuSheet(t('table.menuTitle'), items.concat([
+      { label: t('common.howToPlay'), onClick: () => openRules('freecell') },
+      { label: t('common.settings'), onClick: () => openSettings(() => render()) },
     ]));
   }
 
@@ -307,12 +311,12 @@ export function mountGame(host, o) {
       const r = tryMove(selection.pile, selection.index, loc.pid, selection.flex);
       if (r.ok) { lastTap = { t: 0, pid: null }; return; }
       if (loc.index >= 0 && engine.canPickUp(state, loc.pid, loc.index)) { selection = { pile: loc.pid, index: loc.index }; render(); }
-      toast(r.reason || 'Can’t move there.');
+      toast(r.reason || t('table.cantMove'));
       return;
     }
     if (loc.index < 0) return;
     if (engine.canPickUp(state, loc.pid, loc.index)) { selection = { pile: loc.pid, index: loc.index }; render(); }
-    else toast(loc.pid.startsWith(engine.zones.foundation) ? 'Cards don’t leave the foundations.' : 'Only an ordered run can move together.');
+    else toast(loc.pid.startsWith(engine.zones.foundation) ? t('table.foundationLocked') : t('table.notARun'));
   }
 
   function startDrag(e) {
@@ -363,7 +367,7 @@ export function mountGame(host, o) {
         commit({ from, index, to: r.to }, rects);
         return;
       }
-      toast(r.reason || 'Can’t move there.');
+      toast(r.reason || t('table.cantMove'));
     }
     render(rects);
   }
@@ -437,7 +441,7 @@ export function mountGame(host, o) {
       if (selection) {
         if (selection.pile === pid) { selection = null; render(); return; }
         const r = tryMove(selection.pile, selection.index, pid, selection.flex);
-        if (!r.ok) toast(r.reason || 'Can’t move there.');
+        if (!r.ok) toast(r.reason || t('table.cantMove'));
         return;
       }
       if (!p.length) return;

@@ -2,6 +2,7 @@ import { boot, P, getSettings } from './boot.js';
 import { mountGame } from './table.js';
 import { randomDeal } from './engine.js';
 import { read, write, formatTime, recordStats, markPlayed, persist } from './store.js';
+import { t } from './strings.js';
 
 await boot('../');
 
@@ -38,10 +39,10 @@ const ctl = mountGame(host, {
   onWin: showWin,
   onNewGame: () => newGame(true),
   menu: () => [
-    { label: 'New game', onClick: () => newGame(), primary: true },
-    { label: 'Restart this deal', onClick: () => confirmLeave(() => ctl.restart()) },
-    { label: 'Choose deal number…', onClick: chooseDeal },
-    { label: 'All games', onClick: () => confirmLeave(() => { location.href = '../'; }, true) },
+    { label: t('common.newGame'), onClick: () => newGame(), primary: true },
+    { label: t('freecell.restart'), onClick: () => confirmLeave(() => ctl.restart()) },
+    { label: t('freecell.chooseDeal'), onClick: chooseDeal },
+    { label: t('common.allGames'), onClick: () => confirmLeave(() => { location.href = '../'; }, true) },
   ],
 });
 write(lastKey, firstDeal);
@@ -58,11 +59,11 @@ function confirmLeave(then, keep) {
   if (keep || !ctl.inProgress || !getSettings().play.confirmNewGame) return then();
   let close;
   close = P.openSheet(P.Sheet({
-    title: 'Leave this game?',
-    children: [Object.assign(document.createElement('p'), { className: 'pl-p', textContent: 'This deal will count as a loss.' })],
+    title: t('freecell.leaveTitle'),
+    children: [Object.assign(document.createElement('p'), { className: 'pl-p', textContent: t('freecell.leaveBody') })],
     footer: [
-      P.Button({ label: 'Leave', variant: 'primary', onClick: () => { close(); recordStats(statsKey, { won: false }); then(); } }),
-      P.Button({ label: 'Keep playing', onClick: () => close() }),
+      P.Button({ label: t('freecell.leave'), variant: 'primary', onClick: () => { close(); recordStats(statsKey, { won: false }); then(); } }),
+      P.Button({ label: t('freecell.keepPlaying'), onClick: () => close() }),
     ],
     onClose: () => close(),
   }));
@@ -76,14 +77,14 @@ function newGame(skipConfirm) {
 function chooseDeal() {
   let close;
   const input = Object.assign(document.createElement('input'), { type: 'number', min: 1, max: 1000000, inputMode: 'numeric', value: ctl.deal, className: 'pa-input' });
-  input.setAttribute('aria-label', 'Deal number');
+  input.setAttribute('aria-label', t('freecell.chooseLabel'));
   Object.assign(input.style, { width: '100%', minHeight: '44px', font: '600 18px var(--font-ui)', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)' });
   const go = () => { const n = parseInt(input.value, 10); if (n > 0) { close(); confirmLeave(() => start(n)); } };
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
   close = P.openSheet(P.Sheet({
-    title: 'Choose a deal',
-    children: [Object.assign(document.createElement('p'), { className: 'pl-p', textContent: 'Classic FreeCell numbering: Deal #617 is the same layout everywhere.' }), input],
-    footer: [P.Button({ label: 'Deal', variant: 'primary', onClick: go })],
+    title: t('freecell.chooseTitle'),
+    children: [Object.assign(document.createElement('p'), { className: 'pl-p', textContent: t('freecell.chooseBody') }), input],
+    footer: [P.Button({ label: t('freecell.deal'), variant: 'primary', onClick: go })],
     onClose: () => close(),
   }));
   input.select();
@@ -94,6 +95,7 @@ function showWin(result) {
   persist();
   let close;
   close = P.openSheet(P.WinDialog({
+    title: t('freecell.winTitle'),
     deal: result.deal,
     time: formatTime(result.time),
     moves: result.moves,

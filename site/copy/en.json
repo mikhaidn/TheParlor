@@ -1,0 +1,177 @@
+{
+  "_about": "Every piece of text the app shows. Edit the words freely; keep {placeholders} exactly as written. 'one' / 'other' pairs are singular / plural. Text inside the Parlor design system's own components (game bar buttons it draws itself, the rules sheet, settings labels) lives in the design system, except where overridden under designSystem below.",
+
+  "common": {
+    "today": "Today",
+    "allGames": "All games",
+    "settings": "Settings",
+    "howToPlay": "How to play",
+    "menu": "Menu",
+    "undo": "Undo",
+    "hint": "Hint",
+    "newGame": "New game",
+    "time": "Time",
+    "moves": "Moves",
+    "undos": "Undos",
+    "comingSoon": "Coming soon",
+    "nextDealIn": "Next deal in {time}"
+  },
+
+  "launcher": {
+    "today": "Today",
+    "games": "Games",
+    "install": "Install app",
+    "updateReady": "Update ready",
+    "restart": "Restart",
+    "iosHint": "Add Parlor to your Home Screen: Share → Add to Home Screen.",
+    "iosDismiss": "Got it",
+    "build": "Build {build}",
+    "dailyTitle": "Daily",
+    "dailyMeta": "Daily #{n} · {status}",
+    "dailySolved": "Solved in {time}",
+    "dailyStreak": "{count}-day streak",
+    "dailyNew": "One deal a day",
+    "badgeDone": "Done",
+    "badgeNew": "New",
+    "freecellResume": "Resume Deal #{deal}",
+    "freecellStats": "{won} won · best {best}",
+    "freecellMeta": "Classic numbered deals",
+    "bakersTitle": "Baker’s Game",
+    "bakersMeta": "FreeCell, built by suit"
+  },
+
+  "table": {
+    "dealLabel": "Deal #{deal}",
+    "menuTitle": "Menu",
+    "cantMove": "Can’t move there.",
+    "foundationLocked": "Cards don’t leave the foundations.",
+    "notARun": "Only an ordered run can move together.",
+    "stuckTitle": "No more moves",
+    "stuckBody": "Undo a few moves to try another way, or start fresh."
+  },
+
+  "freecell": {
+    "restart": "Restart this deal",
+    "chooseDeal": "Choose deal number…",
+    "leaveTitle": "Leave this game?",
+    "leaveBody": "This deal will count as a loss.",
+    "leave": "Leave",
+    "keepPlaying": "Keep playing",
+    "chooseTitle": "Choose a deal",
+    "chooseBody": "Classic FreeCell numbering: Deal #617 is the same layout everywhere.",
+    "chooseLabel": "Deal number",
+    "deal": "Deal",
+    "winTitle": "Solved!"
+  },
+
+  "daily": {
+    "stats": "Stats",
+    "label": "Daily #{n} · {date}",
+    "title": "Today’s deal",
+    "subtitle": "FreeCell · Deal #{deal}",
+    "play": "Play today’s deal",
+    "continue": "Continue today’s deal",
+    "solvedLine": "Solved in {time} · {moves} moves",
+    "seeResult": "See result",
+    "streak": "Streak",
+    "solved": "Solved",
+    "best": "Best",
+    "days": { "one": "1 day", "other": "{count} days" },
+    "solvedOf": "{solved} of {played}",
+    "thisWeek": "This week",
+    "tip": "Tip the table",
+    "barDeal": "Daily #{n}",
+    "barPractice": "Daily #{n} · practice",
+    "barLate": "Daily #{n} · late",
+    "backToToday": "Back to today",
+    "backToStats": "Back to stats",
+    "practiceSolved": "Solved in {time} · {moves} moves. Your result stays as it was.",
+    "solvedTitle": "Solved!",
+    "solvedSub": "Deal #{deal} · {date}",
+    "newBest": "New best",
+    "streakLine": "{count}-day streak",
+    "lateLine": "Solved late: counts toward Solved, not your streak.",
+    "gridTitle": "Parlor Daily #{n}",
+    "gridCaption": "Ace to king, shaded by when each card went home.",
+    "share": "Share result",
+    "replay": "Replay this deal"
+  },
+
+  "calendar": {
+    "title": "Stats",
+    "streak": "Streak",
+    "longest": "Longest",
+    "solved": "Solved",
+    "fastest": "Fastest",
+    "solvedOf": "{solved}/{played}",
+    "prev": "Previous month",
+    "next": "Next month",
+    "legend": { "solved": "Solved", "missed": "Not solved", "none": "Not played", "today": "Today" },
+    "chip": { "solved": "Solved", "late": "Solved late", "missed": "Not solved", "none": "Not played", "today": "Today" },
+    "state": { "solved": "solved", "missed": "not solved", "none": "not played", "today": "today", "future": "upcoming", "before": "before Parlor Daily" },
+    "sub": "Daily #{n} · Deal #{deal}",
+    "solvedSub": "Daily #{n} · {time} · {moves} moves · {undos} undos",
+    "missedNote": "You started this deal but didn’t finish it.",
+    "noneNote": "You didn’t play this one.",
+    "play": "Play this deal",
+    "continue": "Continue this deal",
+    "lateRule": "Late solves count toward Solved, not your streak.",
+    "todayNote": "Today’s deal is waiting.",
+    "todayPlay": "Play today’s deal",
+    "seeResult": "See result",
+    "replay": "Replay"
+  },
+
+  "share": {
+    "title": "Share result",
+    "copy": "Copy text",
+    "copied": "Copied",
+    "native": "Share…",
+    "image": "Save image",
+    "previewLabel": "Text that will be copied",
+    "copyFailed": "Couldn’t copy here. Select the text and copy it.",
+    "imageSaved": "Share card saved.",
+    "text": {
+      "header": "Parlor Daily #{n} · FreeCell",
+      "squaresLine": "Solved in {time} · {moves} moves",
+      "barsLine": "{time} · {moves} moves",
+      "short": "Parlor Daily #{n} ♠♥♦♣ solved in {time} ({moves} moves). {tail}",
+      "tail": "Same deal, your turn → {link}"
+    },
+    "caption": {
+      "squares": "Ace to king. Green went home early, red late.",
+      "bars": "Ace to king. Taller bars went home later.",
+      "short": ""
+    },
+    "card": {
+      "title": "Parlor Daily #{n}",
+      "subtitle": "FreeCell · {date}",
+      "time": "TIME",
+      "moves": "MOVES",
+      "streak": "STREAK",
+      "tail": "Same deal, your turn."
+    }
+  },
+
+  "statsFile": {
+    "title": "Stats file",
+    "help": "Daily results, streaks and game stats. Importing adds to what’s here.",
+    "export": "Export",
+    "import": "Import…",
+    "shared": "Stats shared.",
+    "saved": "Saved {file}.",
+    "notParlor": "That isn’t a Parlor file.",
+    "isSettings": "That’s a settings file. Use Import under Settings file.",
+    "notStats": "That isn’t a Parlor stats file.",
+    "added": { "one": "Added 1 daily result", "other": "Added {count} daily results" },
+    "noneAdded": "No new daily results",
+    "games": { "one": "merged stats for 1 game", "other": "merged stats for {count} games" },
+    "skipped": "Skipped {count} that didn’t look right.",
+    "unreadable": "Couldn’t read that file.",
+    "nothing": "Nothing imported."
+  },
+
+  "designSystem": {
+    "settingsFileHelp": "Preferences only. Stats and saved games aren’t touched."
+  }
+}

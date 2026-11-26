@@ -5,9 +5,10 @@
   python3 tests/e2e.py                 # BASE defaults to http://localhost:8765/site/
 
 Plays a full FreeCell deal and today's Daily through the UI (taps, drags, undo,
-reload-resume), then checks offline play through the service worker and the share card.
+reload-resume), checks offline play through the service worker and the share card,
+then fakes the date to Jan 21 2027 to test the Stats calendar and a late solve.
 """
-import asyncio, base64, json, os
+import asyncio, base64, datetime, json, os
 from playwright.async_api import async_playwright
 BASE = os.environ.get('BASE', 'http://localhost:8765/site/')
 CHROME = os.environ.get('CHROME')  # optional path to a Chrome binary
@@ -129,8 +130,58 @@ async def pwa():
         print('errors', errs)
         await b.close()
 
+CAL_SEED = """import('../js/daily.js').then(m => {
+  const g={spades:[0,0,0,1,1,1,2,2,3,3,3,3,3],hearts:[0,0,1,1,1,2,2,2,2,3,3,3,3],diamonds:[0,1,1,1,2,2,2,3,3,3,3,3,3],clubs:[0,0,0,0,1,1,2,2,2,3,3,3,3]};
+  const results={}, started={};
+  const missed={15:1,43:1,50:1}, skipped={30:1,31:1,51:1};
+  for (let n=1;n<58;n++){ if(skipped[n]) continue; started[n]=true; if(!missed[n]) results[n]={solved:true,time:(150+(n*97)%260)*1000,moves:78+(n*37)%45,undos:(n*7)%5,grid:g}; }
+  localStorage.setItem('parlor.daily.v1', JSON.stringify({results, started}));
+})"""
+
+async def card_el_cal(pg, pid, index):
+    pile = pg.locator(f'[data-pile="{pid}"]')
+    if 'pl-card' in (await pile.get_attribute('class')): return pile
+    return pile.locator(':scope > .pl-card').nth(index)
+async def calendar():
+    async with async_playwright() as p:
+        b = await (p.chromium.launch(executable_path=CHROME) if CHROME else p.chromium.launch())
+        ctx = await b.new_context(viewport={'width':390,'height':844}, timezone_id='America/Chicago')
+        pg = await ctx.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
+        await pg.clock.set_fixed_time(datetime.datetime(2027,1,21,15,0,0, tzinfo=datetime.timezone(datetime.timedelta(hours=-6))))
+        await pg.goto(BASE+'daily/'); await pg.evaluate(CAL_SEED); await pg.reload(); await pg.wait_for_timeout(500)
+        await pg.screenshot(path=os.environ.get('OUT', '/tmp') + '/shot-today-jan.png', full_page=True)
+        await pg.get_by_role('link', name='Stats').click(); await pg.wait_for_timeout(400)
+        print('stats', await pg.locator('.pd-stats-4 .pd-stat-value').all_text_contents())
+        await pg.screenshot(path=os.environ.get('OUT', '/tmp') + '/shot-cal.png', full_page=True)
+        await pg.get_by_role('button', name='Previous month').click(); await pg.wait_for_timeout(150)
+        print('month', await pg.locator('#pd-month-h').text_content())
+        await pg.get_by_role('button', name='Previous month').click(); await pg.wait_for_timeout(150)
+        print('month', await pg.locator('#pd-month-h').text_content(), 'prev disabled', await pg.get_by_role('button', name='Previous month').is_disabled())
+        await pg.screenshot(path=os.environ.get('OUT', '/tmp') + '/shot-cal-nov.png', full_page=True)
+        await pg.get_by_role('button', name='Next month').click(); await pg.get_by_role('button', name='Next month').click(); await pg.wait_for_timeout(150)
+        # select Jan 13 (missed) and play it
+        await pg.locator('.pd-cal-day', has_text='13').first.click(); await pg.wait_for_timeout(150)
+        print('detail', await pg.locator('.pd-detail-chip').text_content(), '|', await pg.locator('.pd-detail-note').text_content())
+        await pg.get_by_role('link', name='Play this deal').click(); await pg.wait_for_timeout(500)
+        print('bar', await pg.locator('.pl-bar-deal').text_content(), pg.url)
+        sol = await pg.evaluate("""async () => { const { solve } = await import('/tools/solver.js'); const { dealFor } = await import('../js/daily.js'); return solve(window.Parlor, dealFor(50)).moves.filter(m=>!m.auto); }""")
+        for m in sol:
+            await (await card_el_cal(pg, m['from'], m['index'])).click(position={'x':8,'y':6})
+            await pg.locator(f'[data-pile="{m["to"]}"]').click(position={'x':8,'y':6})
+            await pg.wait_for_timeout(120)
+        await pg.wait_for_timeout(1200)
+        print('after win', pg.url, '|', await pg.locator('.pd-best').text_content())
+        rec = await pg.evaluate("JSON.parse(localStorage.getItem('parlor.daily.v1')).results[50]")
+        print('late flag', rec['late'])
+        await pg.screenshot(path=os.environ.get('OUT', '/tmp') + '/shot-late-result.png', full_page=True)
+        await pg.locator('.pd-x').click(); await pg.wait_for_timeout(300)
+        print('back at', pg.url, 'stats', await pg.locator('.pd-stats-4 .pd-stat-value').all_text_contents(), 'chip', await pg.locator('.pd-detail-chip').text_content())
+        print('errors', errs)
+        await b.close()
+
 async def main():
     await play()
     await pwa()
+    await calendar()
 
 asyncio.run(main())

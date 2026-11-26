@@ -27,27 +27,27 @@
       <h1 class="pa-suite-title">Parlor</h1>
     </a>
     <div class="pa-head-actions">
-      <button class="pa-icon-link" id="install" type="button" hidden>Install app</button>
-      <button class="pa-icon-link" id="settings" type="button">Settings</button>
+      <button class="pa-icon-link" id="install" type="button" data-copy="launcher.install" hidden>Install app</button>
+      <button class="pa-icon-link" id="settings" type="button" data-copy="common.settings">Settings</button>
     </div>
   </header>
 
   <div class="pa-banner" id="update" hidden>
-    <span>Update ready</span>
-    <button class="pa-btn pa-btn-outline" id="update-btn" type="button">Restart</button>
+    <span data-copy="launcher.updateReady">Update ready</span>
+    <button class="pa-btn pa-btn-outline" id="update-btn" type="button" data-copy="launcher.restart">Restart</button>
   </div>
   <div class="pa-banner" id="ios-hint" hidden>
-    <span>Add Parlor to your Home Screen: Share → Add to Home Screen.</span>
-    <button class="pa-icon-link" id="ios-dismiss" type="button">Got it</button>
+    <span data-copy="launcher.iosHint">Add Parlor to your Home Screen: Share → Add to Home Screen.</span>
+    <button class="pa-icon-link" id="ios-dismiss" type="button" data-copy="launcher.iosDismiss">Got it</button>
   </div>
 
   <section aria-labelledby="today-h">
-    <h2 class="pa-section-title" id="today-h">Today</h2>
+    <h2 class="pa-section-title" id="today-h" data-copy="launcher.today">Today</h2>
     <div class="pa-grid" id="today"></div>
   </section>
 
   <section aria-labelledby="games-h">
-    <h2 class="pa-section-title" id="games-h">Games</h2>
+    <h2 class="pa-section-title" id="games-h" data-copy="launcher.games">Games</h2>
     <div class="pa-grid" id="games"></div>
   </section>
 

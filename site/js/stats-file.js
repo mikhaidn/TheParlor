@@ -3,6 +3,7 @@
 // Importing merges: it never removes or overwrites a result already on this device.
 
 import { read, write } from './store.js';
+import { t, tp } from './strings.js';
 
 const DAILY_KEY = 'parlor.daily.v1';
 const GAME_PREFIX = 'parlor.stats.';
@@ -41,8 +42,8 @@ function validResult(r) {
 
 /** Merge an imported stats object into this device. Returns a summary message. */
 export function merge(data) {
-  if (!data || data.app !== 'parlor') return { ok: false, message: 'That isn’t a Parlor file.' };
-  if (data.kind !== 'stats') return { ok: false, message: data.appearance ? 'That’s a settings file. Use Import under Settings file.' : 'That isn’t a Parlor stats file.' };
+  if (!data || data.app !== 'parlor') return { ok: false, message: t('statsFile.notParlor') };
+  if (data.kind !== 'stats') return { ok: false, message: data.appearance ? t('statsFile.isSettings') : t('statsFile.notStats') };
 
   const local = read(DAILY_KEY, { results: {}, started: {} });
   local.results = local.results || {}; local.started = local.started || {};
@@ -51,7 +52,7 @@ export function merge(data) {
     const n = parseInt(k, 10);
     if (!(n > 0) || !validResult(r)) { skipped++; continue; }
     if (local.results[n]?.solved) continue; // the first solve on record stays
-    local.results[n] = { solved: true, time: r.time, moves: r.moves, undos: r.undos || 0, grid: r.grid, at: r.at || null };
+    local.results[n] = { solved: true, late: !!r.late, time: r.time, moves: r.moves, undos: r.undos || 0, grid: r.grid, at: r.at || null };
     added++;
   }
   for (const k of Object.keys((data.daily && data.daily.started) || {})) if (parseInt(k, 10) > 0) local.started[k] = true;
@@ -73,25 +74,25 @@ export function merge(data) {
   }
 
   const parts = [];
-  parts.push(added ? `Added ${added} daily result${added === 1 ? '' : 's'}` : 'No new daily results');
-  if (games) parts.push(`merged stats for ${games} game${games === 1 ? '' : 's'}`);
+  parts.push(added ? tp('statsFile.added', added) : t('statsFile.noneAdded'));
+  if (games) parts.push(tp('statsFile.games', games));
   let message = parts.join(', ') + '.';
-  if (skipped) message += ` Skipped ${skipped} that didn’t look right.`;
+  if (skipped) message += ' ' + t('statsFile.skipped', { count: skipped });
   dispatchEvent(new CustomEvent('parlor:stats-changed'));
   return { ok: true, added, games, message };
 }
 
 export async function importStatsFile(file) {
-  if (!file) return { ok: false, message: 'Nothing imported.' };
-  try { return merge(JSON.parse(await file.text())); } catch { return { ok: false, message: 'Couldn’t read that file.' }; }
+  if (!file) return { ok: false, message: t('statsFile.nothing') };
+  try { return merge(JSON.parse(await file.text())); } catch { return { ok: false, message: t('statsFile.unreadable') }; }
 }
 
 /** The "Stats file" group for the Settings sheet, built from the same pieces as its "Settings file" group. */
 export function statsGroup(P) {
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const group = el('div', 'pl-set-group pl-set-file');
-  group.appendChild(el('h3', 'pl-h3', 'Stats file'));
-  group.appendChild(el('p', 'pl-set-help', 'Daily results, streaks and game stats. Importing adds to what’s here.'));
+  group.appendChild(el('h3', 'pl-h3', t('statsFile.title')));
+  group.appendChild(el('p', 'pl-set-help', t('statsFile.help')));
   const status = el('p', 'pl-set-status'); status.setAttribute('role', 'status');
   const input = Object.assign(el('input'), { type: 'file', accept: 'application/json,.json', hidden: true });
   input.addEventListener('change', async () => {
@@ -100,11 +101,11 @@ export function statsGroup(P) {
     input.value = '';
   });
   const acts = el('div', 'pl-set-actions');
-  acts.appendChild(P.Button({ label: 'Export', onClick: async () => {
+  acts.appendChild(P.Button({ label: t('statsFile.export'), onClick: async () => {
     const how = await exportStats();
-    if (how !== 'cancelled') status.textContent = how === 'shared' ? 'Stats shared.' : `Saved ${FILE_NAME}.`;
+    if (how !== 'cancelled') status.textContent = how === 'shared' ? t('statsFile.shared') : t('statsFile.saved', { file: FILE_NAME });
   } }));
-  acts.appendChild(P.Button({ label: 'Import…', onClick: () => input.click() }));
+  acts.appendChild(P.Button({ label: t('statsFile.import'), onClick: () => input.click() }));
   group.append(acts, input, status);
   return group;
 }

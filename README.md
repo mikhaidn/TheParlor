@@ -6,7 +6,7 @@ What's here now:
 
 - **Launcher**: every game as a tile. FreeCell and Baker's Game are playable; Klondike, Spider, Pyramid, TriPeaks and Hearts are marked "Coming soon".
 - **FreeCell**: classic Microsoft-numbered deals (Deal #617 is the same layout everywhere), with undo, hints, safe auto-moves, win stats, and a saved game that survives reloads.
-- **Parlor Daily**: one FreeCell deal a day, the same for everyone and worked out from the date (Daily #1 = Nov 25, 2026). It has a streak, a week strip, a Solved screen with a spoiler-free share grid, and a share card (image + text).
+- **Parlor Daily**: one FreeCell deal a day, the same for everyone and worked out from the date (Daily #1 = Nov 25, 2026). It has a streak, a week strip, a Stats calendar (past days can be played late: they count toward Solved but not the streak), a Solved screen with a share grid, and a text-first share sheet with an image option.
 
 Live site, once Pages is on: **https://mikhaidn.github.io/TheParlor/**
 
@@ -29,6 +29,18 @@ No build step or dependencies are needed to *run* it: it's plain HTML, CSS and E
 
 To try install/offline on a phone you need HTTPS, so use the Pages URL (or a tunnel).
 
+## Editing the text
+
+Every word the app shows lives in **[`site/copy/en.json`](site/copy/en.json)**, grouped by screen (`launcher`, `daily`, `calendar`, `share`, …).
+
+- Change the words; leave `{placeholders}` as they are (`"Next deal in {time}"`).
+- `one` / `other` pairs are singular and plural (`"1 day"` / `"{count} days"`).
+- An empty string hides that line where the app allows it (e.g. `share.caption.short`).
+- `designSystem` overrides text drawn by the Parlor design system's own components. Everything else in those components (the rules sheet, settings labels) is in the design system itself.
+- Not in the file: page `<title>`s and descriptions in the HTML heads, and `manifest.webmanifest` (the app name shown when installed).
+
+Run `node tools/build.mjs` (or let the deploy do it) so the offline cache picks up the change.
+
 ## Controls
 
 | | Touch | Mouse / trackpad | Keyboard |
@@ -48,9 +60,11 @@ Players can switch to tap-only or drag-only input, plus left-handed layout, card
 site/                     ← deployed as-is
   index.html              launcher
   freecell/               FreeCell / Baker's Game table   (?deal=617, ?rules=parlor.rules.bakers-game)
-  daily/                  Parlor Daily: #today, #play, #solved, #replay
+  daily/                  Parlor Daily: #today, #play, #solved, #stats, #day=N, #play=N, #replay
   parlor/                 the Parlor design system: bundle.js/.css (unmodified) + generated tokens.css
+  copy/en.json            all user-facing text (see Editing the text)
   js/
+    strings.js            t() / tp(): loads copy/en.json, fills {placeholders}, plurals
     engine.js             FreeCell-family rules on top of Parlor.rules: moves, auto-moves, hints, replay
     table.js              renders FreeCellTable; pointer + keyboard input, drag ghost, undo, timer, save/resume
     daily.js              date → daily number → deal, streaks, share grid + text

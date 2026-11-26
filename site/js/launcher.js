@@ -3,6 +3,7 @@ import { onPWAChange, promptInstall, applyUpdate } from './pwa.js';
 import { openSettings } from './table.js';
 import { read, write, formatTime } from './store.js';
 import { dailyNumber, summary } from './daily.js';
+import { t } from './strings.js';
 
 await boot('./');
 
@@ -16,21 +17,21 @@ function renderTiles() {
 
   document.getElementById('today').replaceChildren(
     P.GameTile({
-      game: 'freecell', title: 'Daily',
-      meta: `Daily #${today} · ` + (sum.today ? `Solved in ${formatTime(sum.today.time)}` : sum.streak ? `${sum.streak}-day streak` : 'One deal a day'),
-      badge: sum.today ? 'Done' : 'New',
+      game: 'freecell', title: t('launcher.dailyTitle'),
+      meta: t('launcher.dailyMeta', { n: today, status: sum.today ? t('launcher.dailySolved', { time: formatTime(sum.today.time) }) : sum.streak ? t('launcher.dailyStreak', { count: sum.streak }) : t('launcher.dailyNew') }),
+      badge: sum.today ? t('launcher.badgeDone') : t('launcher.badgeNew'),
       onClick: go('daily/'),
     }),
   );
 
   const games = [
-    { game: 'freecell', meta: saved && saved.moves?.length && !saved.won ? `Resume Deal #${saved.deal}` : fc?.won ? `${fc.won} won · best ${formatTime(fc.best)}` : 'Classic numbered deals', href: 'freecell/' },
-    { game: 'freecell', title: 'Baker’s Game', meta: 'FreeCell, built by suit', href: 'freecell/?rules=parlor.rules.bakers-game' },
-    { game: 'klondike', meta: 'Coming soon' },
-    { game: 'spider', meta: 'Coming soon' },
-    { game: 'pyramid', meta: 'Coming soon' },
-    { game: 'tripeaks', meta: 'Coming soon' },
-    { game: 'hearts', meta: 'Coming soon' },
+    { game: 'freecell', meta: saved && saved.moves?.length && !saved.won ? t('launcher.freecellResume', { deal: saved.deal }) : fc?.won ? t('launcher.freecellStats', { won: fc.won, best: formatTime(fc.best) }) : t('launcher.freecellMeta'), href: 'freecell/' },
+    { game: 'freecell', title: t('launcher.bakersTitle'), meta: t('launcher.bakersMeta'), href: 'freecell/?rules=parlor.rules.bakers-game' },
+    { game: 'klondike', meta: t('common.comingSoon') },
+    { game: 'spider', meta: t('common.comingSoon') },
+    { game: 'pyramid', meta: t('common.comingSoon') },
+    { game: 'tripeaks', meta: t('common.comingSoon') },
+    { game: 'hearts', meta: t('common.comingSoon') },
   ];
   const grid = document.getElementById('games');
   grid.replaceChildren();
@@ -56,4 +57,4 @@ onPWAChange((s) => {
   document.getElementById('ios-hint').hidden = !s.iosHint || s.standalone || read('parlor.iosHintSeen', false);
 });
 
-fetch('version.json').then((r) => r.ok ? r.json() : null).then((v) => { if (v) document.getElementById('version').textContent = 'Build ' + v.build; }).catch(() => {});
+fetch('version.json').then((r) => r.ok ? r.json() : null).then((v) => { if (v) document.getElementById('version').textContent = t('launcher.build', { build: v.build }); }).catch(() => {});

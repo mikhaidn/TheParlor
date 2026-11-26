@@ -3,6 +3,7 @@
 
 import { UNSOLVABLE_DEALS, FOUNDATION_SUITS, rankN } from './engine.js';
 import { read, write } from './store.js';
+import { t } from './strings.js';
 
 /** Daily #1 is launch day. Change before launch if needed — it renumbers every daily. */
 export const EPOCH = { y: 2026, m: 11, d: 25 };
@@ -55,11 +56,12 @@ export function markStarted(n) {
   write(RECORDS_KEY, r);
 }
 
-export function saveResult(n, result) {
+/** Save a solve. Late solves (a past day) count toward Solved, never toward the streak. */
+export function saveResult(n, result, { late = false } = {}) {
   const r = records();
   if (r.results[n]?.solved) return { saved: false, record: r.results[n] }; // replays never overwrite
   const best = bestTime(r);
-  r.results[n] = { solved: true, time: result.time, moves: result.moves, undos: result.undos, grid: shareGrid(result), at: new Date().toISOString() };
+  r.results[n] = { solved: true, late, time: result.time, moves: result.moves, undos: result.undos, grid: shareGrid(result), at: new Date().toISOString() };
   write(RECORDS_KEY, r);
   return { saved: true, record: r.results[n], newBest: best == null || result.time < best };
 }
@@ -69,20 +71,34 @@ export function bestTime(r = records()) {
   return times.length ? Math.min(...times) : null;
 }
 
+const onTime = (r, n) => !!(r.results[n]?.solved && !r.results[n].late);
+
+/** 'solved' | 'missed' (started, not solved) | 'none' (not played) | 'today' | 'future' | 'before' */
+export function dayStatus(n, today = dailyNumber(), r = records()) {
+  if (n < 1) return 'before';
+  if (n > today) return 'future';
+  if (r.results[n]?.solved) return 'solved';
+  if (n === today) return 'today';
+  return r.started[n] ? 'missed' : 'none';
+}
+
 export function summary(today = dailyNumber()) {
   const r = records();
   const played = new Set([...Object.keys(r.started), ...Object.keys(r.results)].map(Number));
   const solved = Object.keys(r.results).map(Number).filter((n) => r.results[n].solved);
-  // Streak: consecutive solved days ending today (or yesterday, if today isn't done yet).
+  // Streak: consecutive on-time solves ending today (or yesterday, if today isn't done yet).
   let streak = 0;
-  let n = r.results[today]?.solved ? today : today - 1;
-  while (r.results[n]?.solved) { streak++; n--; }
+  let n = onTime(r, today) ? today : today - 1;
+  while (onTime(r, n)) { streak++; n--; }
+  let longest = 0, run = 0;
+  for (let k = 1; k <= today; k++) { if (onTime(r, k)) { run++; longest = Math.max(longest, run); } else if (k < today) run = 0; }
   const week = [];
   for (let i = 6; i >= 0; i--) {
     const k = today - i;
-    week.push({ n: k, date: dateOf(k), state: r.results[k]?.solved ? 'solved' : k === today ? 'today' : k < 1 ? 'none' : 'missed' });
+    const st = dayStatus(k, today, r);
+    week.push({ n: k, date: dateOf(k), state: st === 'solved' ? 'solved' : st === 'today' ? 'today' : st === 'before' ? 'none' : 'missed' });
   }
-  return { streak, solved: solved.length, played: played.size, best: bestTime(r), week, today: r.results[today] || null };
+  return { streak, longest, solved: solved.length, played: played.size, best: bestTime(r), week, today: r.results[today] || null };
 }
 
 /**
@@ -115,10 +131,11 @@ export function shareLink(href) {
 }
 
 export function shareText(n, rec, link, format = SHARE_FORMAT) {
-  const tail = `Same deal, your turn → ${link}`;
-  if (format === 'short') return `Parlor Daily #${n} ♠♥♦♣ solved in ${fmt(rec.time)} (${rec.moves} moves). ${tail}`;
+  const vars = { n, time: fmt(rec.time), moves: rec.moves };
+  const tail = t('share.text.tail', { link });
+  if (format === 'short') return t('share.text.short', { ...vars, tail });
   const squares = format !== 'bars';
-  const lines = [`Parlor Daily #${n} · FreeCell`, `${squares ? 'Solved in ' : ''}${fmt(rec.time)} · ${rec.moves} moves`];
+  const lines = [t('share.text.header', vars), t(squares ? 'share.text.squaresLine' : 'share.text.barsLine', vars)];
   for (const s of FOUNDATION_SUITS) {
     const marks = rec.grid[s].map((q) => (squares ? SQUARES : BARS)[q]).join('');
     lines.push(`${squares ? SUIT_EMOJI[s] : SUIT_CHAR[s]} ${marks}`);
@@ -127,11 +144,7 @@ export function shareText(n, rec, link, format = SHARE_FORMAT) {
   return lines.join('\n');
 }
 
-export const SHARE_CAPTION = {
-  squares: 'Ace to king. Green went home early, red late.',
-  bars: 'Ace to king. Taller bars went home later.',
-  short: '',
-};
+export const shareCaption = (format = SHARE_FORMAT) => t('share.caption.' + format);
 
 function fmt(ms) {
   const s = Math.floor(ms / 1000);

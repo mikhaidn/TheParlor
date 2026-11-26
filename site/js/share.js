@@ -3,6 +3,7 @@
 
 import { FOUNDATION_SUITS } from './engine.js';
 import { formatTime } from './store.js';
+import { t } from './strings.js';
 
 const SUIT_PATHS = {
   spades: 'M12 1.8c.7.6 9.8 7.1 9.8 12.6 0 2.9-2.2 5-4.9 5-1.9 0-3.3-.9-4.1-2.2.1 1.9.8 3.4 2.4 4.9H8.8c1.6-1.5 2.3-3 2.4-4.9-.8 1.3-2.2 2.2-4.1 2.2-2.7 0-4.9-2.1-4.9-5C2.2 8.9 11.3 2.4 12 1.8z',
@@ -30,8 +31,8 @@ export async function drawShareCard({ n, rec, streak, dateLabel, linkLabel }) {
 
   // Title
   ctx.fillStyle = '#f4efe3'; ctx.textBaseline = 'alphabetic';
-  ctx.font = `600 40px ${DISPLAY}`; ctx.fillText(`Parlor Daily #${n}`, 44, 40 + 34);
-  ctx.fillStyle = '#bcd2c5'; ctx.font = `400 17px ${UI}`; ctx.fillText(`FreeCell · ${dateLabel}`, 44, 40 + 44 + 4 + 16);
+  ctx.font = `600 40px ${DISPLAY}`; ctx.fillText(t('share.card.title', { n }), 44, 40 + 34);
+  ctx.fillStyle = '#bcd2c5'; ctx.font = `400 17px ${UI}`; ctx.fillText(t('share.card.subtitle', { date: dateLabel }), 44, 40 + 44 + 4 + 16);
 
   // Card back
   const bx = W - 44 - 44, by = 40;
@@ -59,7 +60,7 @@ export async function drawShareCard({ n, rec, streak, dateLabel, linkLabel }) {
 
   // Stats
   const sy = gy + gh + 20;
-  [['TIME', formatTime(rec.time)], ['MOVES', String(rec.moves)], ['STREAK', String(streak)]].forEach(([label, value], i) => {
+  [[t('share.card.time'), formatTime(rec.time)], [t('share.card.moves'), String(rec.moves)], [t('share.card.streak'), String(streak)]].forEach(([label, value], i) => {
     const x = 44 + i * 120;
     ctx.fillStyle = '#bcd2c5'; ctx.font = `600 12px ${UI}`;
     ctx.letterSpacing = '0.72px'; ctx.fillText(label, x, sy + 12); ctx.letterSpacing = '0px';
@@ -69,7 +70,7 @@ export async function drawShareCard({ n, rec, streak, dateLabel, linkLabel }) {
   // Footer
   const fy = H - 40 - 34;
   ctx.fillStyle = '#8fb9a3'; ctx.fillRect(44, fy, W - 88, 1);
-  ctx.font = `600 15px ${UI}`; ctx.fillStyle = '#f4efe3'; ctx.fillText('Same deal, your turn.', 44, fy + 14 + 15);
+  ctx.font = `600 15px ${UI}`; ctx.fillStyle = '#f4efe3'; ctx.fillText(t('share.card.tail'), 44, fy + 14 + 15);
   ctx.font = `400 15px ${UI}`; ctx.fillStyle = '#bcd2c5'; ctx.textAlign = 'right'; ctx.fillText(linkLabel, W - 44, fy + 14 + 15);
 
   return new Promise((resolve) => c.toBlob(resolve, 'image/png'));
