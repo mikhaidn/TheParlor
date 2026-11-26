@@ -1,0 +1,130 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-24T03:20:00Z"
+  },
+  "title": "Parlor",
+  "namespace": "Parlor",
+  "libraries": [],
+  "sections": {},
+  "groups": [
+    "Logos",
+    "Suits",
+    "Packs",
+    "PWA",
+    "Settings"
+  ],
+  "assetGroups": {
+    "Logos": {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "parlor-mark.svg"
+      ],
+      "files": {
+        "parlor-mark.svg": {
+          "name": "parlor-mark.svg",
+          "blob": "b47e7ced53a99fbc1049fc9931ca4f5d",
+          "size": 647,
+          "type": "image/svg+xml"
+        }
+      }
+    },
+    "Suits": {
+      "name": "Suits",
+      "tile": "s",
+      "order": [
+        "spade.svg",
+        "heart.svg",
+        "diamond.svg",
+        "club.svg"
+      ],
+      "files": {
+        "spade.svg": {
+          "name": "spade.svg",
+          "blob": "b995aeecfe90d8cb830b4528d0e15ab9",
+          "size": 281,
+          "type": "image/svg+xml"
+        },
+        "heart.svg": {
+          "name": "heart.svg",
+          "blob": "39743dae3a8281fd19ff474788625e99",
+          "size": 242,
+          "type": "image/svg+xml"
+        },
+        "diamond.svg": {
+          "name": "diamond.svg",
+          "blob": "dafed5c2734ffbe3a4d8c4b9dd28d6b5",
+          "size": 130,
+          "type": "image/svg+xml"
+        },
+        "club.svg": {
+          "name": "club.svg",
+          "blob": "9caf5f92cb83d45a55ae4b362bd07b55",
+          "size": 240,
+          "type": "image/svg+xml"
+        }
+      }
+    },
+    "PWA": {
+      "name": "PWA",
+      "tile": "m",
+      "order": [
+        "parlor-maskable-512.png",
+        "parlor-512.png",
+        "parlor-192.png",
+        "apple-touch-icon-180.png"
+      ],
+      "files": {
+        "parlor-192.png": {
+          "name": "parlor-192.png",
+          "blob": "cc9ec27bf6492b7366d489e164568c03",
+          "size": 6912,
+          "type": "image/png"
+        },
+        "parlor-512.png": {
+          "name": "parlor-512.png",
+          "blob": "a965b2942a8956c58e545a9bb15e898b",
+          "size": 19998,
+          "type": "image/png"
+        },
+        "parlor-maskable-512.png": {
+          "name": "parlor-maskable-512.png",
+          "blob": "4ae54dffad295c4a6ce8674a5f66fa01",
+          "size": 12279,
+          "type": "image/png"
+        },
+        "apple-touch-icon-180.png": {
+          "name": "apple-touch-icon-180.png",
+          "blob": "1b5487d7caa13db55313ad294b06e3db",
+          "size": 4907,
+          "type": "image/png"
+        }
+      }
+    },
+    "Settings": {
+      "name": "Settings",
+      "tile": "s",
+      "order": [],
+      "files": {}
+    },
+    "Packs": {
+      "name": "Packs",
+      "tile": "s",
+      "order": [],
+      "files": {}
+    }
+  },
+  "blobs": {},
+  "docs": {
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Claude",
+    "at": "2026-11-24T17:40:00Z",
+    "via": "Claude",
+    "note": "Added the content layer: deck/table/layout/ruleset/pack definitions, Board, rules engine, card editor, shop PackCard, example packs and schema."
+  }
+}

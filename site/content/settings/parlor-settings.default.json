@@ -1,0 +1,28 @@
+{
+  "$schema": "parlor-settings.schema.json",
+  "app": "parlor",
+  "version": 1,
+  "appearance": {
+    "theme": "system",
+    "cardSize": "auto",
+    "cardStyle": "classic",
+    "fourColor": false,
+    "deck": "parlor.deck.classic",
+    "table": "parlor.table.baize",
+    "reduceMotion": "system"
+  },
+  "play": {
+    "input": "both",
+    "autoMove": "safe",
+    "hints": true,
+    "showTimer": true,
+    "showMoves": true,
+    "confirmNewGame": true,
+    "leftHanded": false
+  },
+  "freecell": {
+    "deal": "random",
+    "freeCells": 4,
+    "supermoves": true
+  }
+}

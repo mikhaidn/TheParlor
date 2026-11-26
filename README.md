@@ -1,0 +1,71 @@
+# The Parlor
+
+Classic card games with one look and one set of controls that work the same with touch, mouse, trackpad and keyboard. Installs as an app (PWA) and plays fully offline.
+
+What's here now:
+
+- **Launcher**: every game as a tile. FreeCell and Baker's Game are playable; Klondike, Spider, Pyramid, TriPeaks and Hearts are marked "Coming soon".
+- **FreeCell**: classic Microsoft-numbered deals (Deal #617 is the same layout everywhere), with undo, hints, safe auto-moves, win stats, and a saved game that survives reloads.
+- **Parlor Daily**: one FreeCell deal a day, the same for everyone and worked out from the date (Daily #1 = Nov 25, 2026). It has a streak, a week strip, a Solved screen with a spoiler-free share grid, and a share card (image + text).
+
+Live site, once Pages is on: **https://mikhaidn.github.io/TheParlor/**
+
+## Turn on GitHub Pages (one time)
+
+1. Repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Push to `main` (or run the **Deploy to GitHub Pages** workflow by hand). The workflow runs `tools/build.mjs` and publishes `site/`.
+
+The site uses only relative paths, so it works under `/TheParlor/`, at a custom domain, or on `localhost`.
+
+## Run locally
+
+```sh
+node tools/build.mjs          # regenerate tokens.css + service-worker cache list
+cd site && python3 -m http.server 8000
+# open http://localhost:8000/
+```
+
+No build step or dependencies are needed to *run* it: it's plain HTML, CSS and ES modules. The build script only matters when you change files, because the service worker pre-caches an exact list.
+
+To try install/offline on a phone you need HTTPS, so use the Pages URL (or a tunnel).
+
+## Controls
+
+| | Touch | Mouse / trackpad | Keyboard |
+| --- | --- | --- | --- |
+| Move a card or run | Tap it, then tap where it goes, **or** drag | Click-click, **or** drag | Arrows to a pile, Enter, arrows to target, Enter |
+| Send to foundation | Double-tap | Double-click | n/a |
+| Undo / Hint | Bar buttons | Bar buttons | `U` / `H` (also Ctrl+Z) |
+| Cancel selection | Tap the same pile | Click the same pile | `Esc` |
+
+Players can switch to tap-only or drag-only input, plus left-handed layout, card size, large index, four-color deck, theme, auto-move and timer, in **Settings**. The settings export/import as a JSON file.
+
+## Layout
+
+```
+site/                     ← deployed as-is
+  index.html              launcher
+  freecell/               FreeCell / Baker's Game table   (?deal=617, ?rules=parlor.rules.bakers-game)
+  daily/                  Parlor Daily: #today, #play, #solved, #replay
+  parlor/                 the Parlor design system: bundle.js/.css (unmodified) + generated tokens.css
+  js/
+    engine.js             FreeCell-family rules on top of Parlor.rules: moves, auto-moves, hints, replay
+    table.js              renders FreeCellTable; pointer + keyboard input, drag ghost, undo, timer, save/resume
+    daily.js              date → daily number → deal, streaks, share grid + text
+    share.js              share card (canvas PNG), Web Share → clipboard → download fallbacks
+    pwa.js / sw.js        install prompt, iOS hint, update-between-games, offline cache
+    analytics.js          launch-metrics events, queued on-device only (no network until ENDPOINT is set)
+  content/                packs (decks, tables, rulesets) and settings presets as JSON definitions
+design/                   the design specs this implements (see design/README.md)
+tools/
+  build.mjs               tokens.css + sw.js cache list + version.json
+  solver.js               best-first FreeCell solver (tests; checking daily deals are solvable)
+tests/e2e.py              Playwright: plays full games through the UI, checks offline + share card
+```
+
+## Notes and next steps
+
+- **Deal 11982** is the one unsolvable deal in 1–32000. Random deals and the daily skip it. Tooling could also run `tools/solver.js` over upcoming daily deals before they go live.
+- **Daily ranking** ("faster than 68% of players"), **launch metrics** and **tips** need a backend. Events are already named and shaped per the Metrics design in `js/analytics.js`. Set `ENDPOINT` there, and `TIP_URL` in `js/daily-page.js`, when ready.
+- Only the **free** packs (Parchment deck, Baker's Game) are registered. Paid and earned packs need an ownership check first (see `design/system/content-model.md`).
+- **Next games**: Klondike and Spider need the two vocabulary additions named in the content model (`stock.draw`, `complete`).

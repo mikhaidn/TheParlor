@@ -1,0 +1,88 @@
+{
+  "kind": "pack",
+  "id": "parlor.pack.midnight",
+  "format": 1,
+  "version": "1.0.0",
+  "name": "Midnight",
+  "author": {
+    "name": "Parlor"
+  },
+  "description": "Navy felt, a gold-dotted back and rounded cards for late games.",
+  "price": {
+    "type": "paid",
+    "sku": "parlor.pack.midnight",
+    "display": "$1.99"
+  },
+  "preview": {
+    "deck": "parlor.deck.midnight",
+    "table": "parlor.table.midnight"
+  },
+  "contents": [
+    "parlor.deck.midnight",
+    "parlor.table.midnight"
+  ],
+  "definitions": [
+    {
+      "kind": "deck",
+      "id": "parlor.deck.midnight",
+      "version": "1.0.0",
+      "name": "Midnight",
+      "face": {
+        "color": "#f7f3ea",
+        "edge": "#d4cbb8"
+      },
+      "suits": {
+        "hearts": "#a3262a",
+        "diamonds": "#a3262a",
+        "spades": "#14213d",
+        "clubs": "#14213d"
+      },
+      "court": {
+        "style": "plain"
+      },
+      "corners": "round",
+      "back": {
+        "pattern": "dots",
+        "color": {
+          "light": "#1c2e4a",
+          "dark": "#16243b"
+        },
+        "line": "#c9a24a"
+      }
+    },
+    {
+      "kind": "table",
+      "id": "parlor.table.midnight",
+      "version": "1.0.0",
+      "name": "Midnight felt",
+      "felt": {
+        "light": "#1b2f4b",
+        "dark": "#121f33"
+      },
+      "feltDeep": {
+        "light": "#142339",
+        "dark": "#0c1625"
+      },
+      "feltLine": {
+        "light": "#8aa5c8",
+        "dark": "#7590b6"
+      },
+      "onFelt": {
+        "light": "#f2efe6",
+        "dark": "#ebe7dc"
+      },
+      "onFeltMuted": {
+        "light": "#b8c4d6",
+        "dark": "#a7b4c8"
+      },
+      "hint": {
+        "light": "#8fd0f5",
+        "dark": "#7cc4f0"
+      },
+      "focus": {
+        "light": "#f4d27a",
+        "dark": "#f0cc6e"
+      }
+    }
+  ]
+}

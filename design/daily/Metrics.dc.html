@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Launch metrics</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Instrument+Sans:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1d1f1e}a:hover{color:#5b605c}
+</style>
+</helmet>
+<div style="box-sizing: border-box; min-height: 100vh; background: #f6f2e8; color: #1d1f1e; font-family: 'Instrument Sans', system-ui, sans-serif; padding: 32px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">PARLOR DAILY</div>
+      <h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 40px; line-height: 44px; font-weight: 600; letter-spacing: -0.01em">Launch metrics</h1>
+      <div style="font-size: 15px; line-height: 22px; color: #5b605c">One question per number: do people come back, and do they bring someone?</div>
+    </div>
+    <div role="group" aria-label="Date range" style="display: flex; border: 1px solid #7f847d; border-radius: 10px; overflow: hidden">
+      <button style="min-height: 44px; padding: 0 16px; border: 0; background: #1d1f1e; color: #f6f2e8; font: 600 15px 'Instrument Sans', system-ui, sans-serif">Today</button>
+      <button style="min-height: 44px; padding: 0 16px; border: 0; border-left: 1px solid #7f847d; background: #ffffff; color: #1d1f1e; font: 600 15px 'Instrument Sans', system-ui, sans-serif">7 days</button>
+      <button style="min-height: 44px; padding: 0 16px; border: 0; border-left: 1px solid #7f847d; background: #ffffff; color: #1d1f1e; font: 600 15px 'Instrument Sans', system-ui, sans-serif">30 days</button>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px">
+    <sc-for list="{{kpis}}" as="k" hint-placeholder-count="9">
+      <div style="background: #ffffff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); display: flex; flex-direction: column; gap: 6px; border-top: {{k.top}}">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+          <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #5b605c">{{k.label}}</div>
+          <div style="font-size: 12px; line-height: 16px; color: #5b605c">{{k.tag}}</div>
+        </div>
+        <div style="font-size: 30px; line-height: 34px; font-weight: 600; font-variant-numeric: tabular-nums">—</div>
+        <div style="font-size: 13px; line-height: 18px; color: #5b605c">{{k.def}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">The daily loop</h2>
+      <div style="font-size: 15px; line-height: 22px; color: #5b605c">Each step is one event. Players drop out between steps; the gaps are where to work.</div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px">
+      <sc-for list="{{funnel}}" as="f" hint-placeholder-count="6">
+        <div style="background: #1f5b43; color: #f4efe3; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+          <div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; color: #bcd2c5">STEP {{f.n}}</div>
+          <div style="font-size: 17px; line-height: 22px; font-weight: 600">{{f.label}}</div>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 18px; color: #bcd2c5">{{f.event}}</div>
+          <div style="font-size: 22px; line-height: 26px; font-weight: 600; font-variant-numeric: tabular-nums">—</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+    <div style="flex: 999 1 560px; min-width: 0; background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 28px; font-weight: 600">Events to log</h2>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14px; line-height: 20px">
+          <thead>
+            <tr style="text-align: left; color: #5b605c">
+              <th style="padding: 8px 12px 8px 0; border-bottom: 1px solid #7f847d; font-size: 12px; letter-spacing: 0.06em; font-weight: 600">EVENT</th>
+              <th style="padding: 8px 12px; border-bottom: 1px solid #7f847d; font-size: 12px; letter-spacing: 0.06em; font-weight: 600">FIRES WHEN</th>
+              <th style="padding: 8px 0 8px 12px; border-bottom: 1px solid #7f847d; font-size: 12px; letter-spacing: 0.06em; font-weight: 600">PROPERTIES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{events}}" as="e" hint-placeholder-count="8">
+              <tr>
+                <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #e2dccf; font-family: ui-monospace, Menlo, monospace; font-size: 13px; white-space: nowrap">{{e.name}}</td>
+                <td style="padding: 10px 12px; border-bottom: 1px solid #e2dccf">{{e.when}}</td>
+                <td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #e2dccf; font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #5b605c">{{e.props}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <div style="background: #1f5b43; color: #f4efe3; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; line-height: 26px; font-weight: 600">Privacy, kept small</h2>
+        <div style="font-size: 15px; line-height: 22px">A random id in the browser, never an account. No ad SDKs, no fingerprinting, no third-party trackers. Every event carries only the fields listed here.</div>
+      </div>
+      <div style="background: #ffffff; border-radius: 16px; padding: 22px; box-shadow: 0 1px 2px rgba(29,31,30,0.08), 0 6px 18px rgba(29,31,30,0.08); display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; line-height: 26px; font-weight: 600">Where it lands</h2>
+        <div style="font-size: 15px; line-height: 22px; color: #1d1f1e">The PWA posts events to one table (Supabase or Firestore), queued offline by the service worker. A nightly job rolls them up into this page.</div>
+        <div style="font-size: 13px; line-height: 18px; color: #5b605c">The percentile on the Solved screen reads the same table: today's deal_solve times.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1380}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const star = '3px solid #d4ad55';
+    const none = '3px solid #ffffff';
+    const kpis = [
+      { label: 'DAILY PLAYERS', tag: 'Reach', def: 'Distinct ids that started today’s deal.', top: none },
+      { label: 'D1 RETURN', tag: 'North star', def: 'Share of yesterday’s players who started today’s deal.', top: star },
+      { label: 'D7 RETURN', tag: 'Habit', def: 'Share of players from 7 days ago who played today.', top: none },
+      { label: 'SOLVE RATE', tag: 'Difficulty', def: 'deal_solve ÷ deal_start. Too low means the deal is too hard.', top: none },
+      { label: 'MEDIAN SOLVE TIME', tag: 'Difficulty', def: 'Middle time_s of today’s solves.', top: none },
+      { label: 'SHARE RATE', tag: 'Growth', def: 'share_tap ÷ deal_solve.', top: none },
+      { label: 'NEW FROM SHARES', tag: 'Growth', def: 'New ids arriving with ref=share, per sharer.', top: none },
+      { label: 'INSTALL RATE', tag: 'Retention', def: 'app_installed ÷ players with 3+ days played.', top: none },
+      { label: 'TIP RATE', tag: 'Support', def: 'tip_paid ÷ weekly players. A thank-you, not a target.', top: none }
+    ];
+    const funnel = [
+      { label: 'Opens the app', event: 'page_view' },
+      { label: 'Starts the deal', event: 'deal_start' },
+      { label: 'Solves it', event: 'deal_solve' },
+      { label: 'Shares', event: 'share_tap' },
+      { label: 'Friend opens link', event: 'page_view ref=share' },
+      { label: 'Back tomorrow', event: 'deal_start, day+1' }
+    ].map((f, i) => ({ ...f, n: i + 1 }));
+    const events = [
+      { name: 'page_view', when: 'The app opens or comes to the front', props: 'anon_id, ref, display_mode' },
+      { name: 'deal_start', when: 'First move on the daily deal', props: 'daily_no, deal_no' },
+      { name: 'deal_solve', when: 'All 52 cards reach the foundations', props: 'daily_no, time_s, moves, undos' },
+      { name: 'deal_quit', when: 'Leaves unsolved, or “No more moves”', props: 'daily_no, time_s, moves, reason' },
+      { name: 'share_tap', when: 'Share result is tapped', props: 'daily_no, method' },
+      { name: 'app_installed', when: 'The browser’s appinstalled event', props: 'platform' },
+      { name: 'tip_start', when: 'Tip checkout opens', props: 'amount' },
+      { name: 'tip_paid', when: 'Stripe confirms the tip', props: 'amount' }
+    ];
+    return { kpis, funnel, events };
+  }
+}
+</script>
+</body>
+</html>

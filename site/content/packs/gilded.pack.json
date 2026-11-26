@@ -1,0 +1,34 @@
+{
+  "kind": "pack",
+  "id": "parlor.pack.gilded",
+  "format": 1,
+  "version": "1.0.0",
+  "name": "Gilded",
+  "author": {
+    "name": "Parlor"
+  },
+  "description": "A dark back with a brass lattice. Earned, not bought.",
+  "price": {
+    "type": "earned"
+  },
+  "preview": {
+    "deck": "parlor.deck.gilded",
+    "table": "parlor.table.baize"
+  },
+  "contents": [
+    "parlor.deck.gilded"
+  ],
+  "definitions": [
+    {
+      "kind": "deck",
+      "id": "parlor.deck.gilded",
+      "version": "1.0.0",
+      "name": "Gilded",
+      "back": {
+        "pattern": "lattice",
+        "color": "#2a2110",
+        "line": "#d4ad55"
+      }
+    }
+  ]
+}

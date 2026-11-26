@@ -1,0 +1,1020 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "parlor-definition.schema.json",
+  "title": "Parlor definition",
+  "description": "Decks, tables, layouts, rulesets and packs for the Parlor card-game suite. See the Content layer section.",
+  "$defs": {
+    "color": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+        },
+        {
+          "type": "object",
+          "required": [
+            "light"
+          ],
+          "properties": {
+            "light": {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            "dark": {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            }
+          }
+        }
+      ]
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+    },
+    "deck": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "const": "deck"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "format": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "author": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "face": {
+          "type": "object",
+          "properties": {
+            "color": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Card face",
+              "default": {
+                "light": "#fbf7ec",
+                "dark": "#e9e3d4"
+              }
+            },
+            "edge": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Card edge",
+              "default": {
+                "light": "#d6ccb6",
+                "dark": "#b3a98f"
+              }
+            }
+          }
+        },
+        "suits": {
+          "type": "object",
+          "properties": {
+            "hearts": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Hearts",
+              "default": "#b3261e"
+            },
+            "diamonds": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Diamonds",
+              "default": "#b3261e"
+            },
+            "spades": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Spades",
+              "default": "#1d1f1e"
+            },
+            "clubs": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Clubs",
+              "default": "#1d1f1e"
+            }
+          }
+        },
+        "fourColor": {
+          "type": "object",
+          "properties": {
+            "diamonds": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Diamonds (four-color)",
+              "default": "#1a5aa8"
+            },
+            "clubs": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Clubs (four-color)",
+              "default": "#0f5a2c"
+            }
+          }
+        },
+        "index": {
+          "type": "object",
+          "properties": {
+            "font": {
+              "enum": [
+                "serif",
+                "sans"
+              ],
+              "title": "Index font",
+              "default": "serif"
+            }
+          }
+        },
+        "court": {
+          "type": "object",
+          "properties": {
+            "style": {
+              "enum": [
+                "framed",
+                "plain"
+              ],
+              "title": "Court cards",
+              "default": "framed"
+            }
+          }
+        },
+        "corners": {
+          "enum": [
+            "square",
+            "standard",
+            "round"
+          ],
+          "title": "Corners",
+          "default": "standard"
+        },
+        "back": {
+          "type": "object",
+          "properties": {
+            "pattern": {
+              "enum": [
+                "lattice",
+                "stripes",
+                "dots",
+                "plain"
+              ],
+              "title": "Back pattern",
+              "default": "lattice"
+            },
+            "color": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Back color",
+              "default": {
+                "light": "#7d1f2c",
+                "dark": "#6a1a25"
+              }
+            },
+            "line": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "light"
+                  ],
+                  "properties": {
+                    "light": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    },
+                    "dark": {
+                      "type": "string",
+                      "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                    }
+                  }
+                }
+              ],
+              "title": "Back pattern color",
+              "default": {
+                "light": "#a84353",
+                "dark": "#8e3442"
+              }
+            }
+          }
+        }
+      }
+    },
+    "table": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "const": "table"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "format": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "author": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "felt": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Felt",
+          "default": {
+            "light": "#1f5b43",
+            "dark": "#143a2b"
+          }
+        },
+        "feltDeep": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Recessed felt",
+          "default": {
+            "light": "#17462f",
+            "dark": "#0e2a1f"
+          }
+        },
+        "feltLine": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Slot outline",
+          "default": {
+            "light": "#8fb9a3",
+            "dark": "#6f9a85"
+          }
+        },
+        "onFelt": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Text on felt",
+          "default": {
+            "light": "#f4efe3",
+            "dark": "#ece6d8"
+          }
+        },
+        "onFeltMuted": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Muted text on felt",
+          "default": {
+            "light": "#bcd2c5",
+            "dark": "#a9c0b3"
+          }
+        },
+        "hint": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Hint glow",
+          "default": {
+            "light": "#8fd0f5",
+            "dark": "#7cc4f0"
+          }
+        },
+        "focus": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            },
+            {
+              "type": "object",
+              "required": [
+                "light"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                }
+              }
+            }
+          ],
+          "title": "Focus ring",
+          "default": {
+            "light": "#f4d27a",
+            "dark": "#f0cc6e"
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "columns",
+        "zones"
+      ],
+      "properties": {
+        "kind": {
+          "const": "layout"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "format": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "author": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "zones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "row",
+              "col",
+              "count"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+              },
+              "kind": {
+                "enum": [
+                  "cell",
+                  "foundation",
+                  "tableau",
+                  "stock",
+                  "waste",
+                  "reserve"
+                ]
+              },
+              "row": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "col": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "fan": {
+                "enum": [
+                  "down",
+                  "right",
+                  "none"
+                ]
+              },
+              "mirror": {
+                "type": "boolean"
+              },
+              "suits": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "spades",
+                    "hearts",
+                    "diamonds",
+                    "clubs"
+                  ]
+                }
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    "ruleset": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "layout",
+        "zones"
+      ],
+      "properties": {
+        "kind": {
+          "const": "ruleset"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "format": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "author": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "layout": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "deal": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "enum": [
+                "numbered",
+                "shuffled"
+              ]
+            },
+            "to": {
+              "type": "string"
+            },
+            "faceUp": {
+              "type": "boolean"
+            }
+          }
+        },
+        "zones": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "pickUp": {
+                "enum": [
+                  "none",
+                  "top",
+                  "run"
+                ]
+              },
+              "run": {
+                "enum": [
+                  "none",
+                  "any",
+                  "down-alternate",
+                  "down-same-suit",
+                  "down-any-suit",
+                  "up-same-suit"
+                ]
+              },
+              "build": {
+                "enum": [
+                  "none",
+                  "any",
+                  "down-alternate",
+                  "down-same-suit",
+                  "down-any-suit",
+                  "up-same-suit"
+                ]
+              },
+              "empty": {
+                "enum": [
+                  "any",
+                  "A",
+                  "K",
+                  "none"
+                ]
+              },
+              "capacity": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "runLimit": {
+          "enum": [
+            "none",
+            "freecell"
+          ]
+        },
+        "autoMove": {
+          "enum": [
+            "off",
+            "safe",
+            "always"
+          ]
+        },
+        "options": {
+          "type": "object"
+        }
+      }
+    },
+    "pack": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "contents"
+      ],
+      "properties": {
+        "kind": {
+          "const": "pack"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "format": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "author": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "price": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "included",
+                "free",
+                "paid",
+                "earned"
+              ]
+            },
+            "sku": {
+              "type": "string"
+            },
+            "display": {
+              "type": "string",
+              "maxLength": 12
+            }
+          }
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "deck": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+            },
+            "table": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+            },
+            "game": {
+              "enum": [
+                "freecell",
+                "klondike",
+                "spider",
+                "pyramid",
+                "tripeaks",
+                "hearts"
+              ]
+            }
+          }
+        },
+        "contents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+          }
+        },
+        "definitions": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/deck"
+              },
+              {
+                "$ref": "#/$defs/table"
+              },
+              {
+                "$ref": "#/$defs/layout"
+              },
+              {
+                "$ref": "#/$defs/ruleset"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/deck"
+    },
+    {
+      "$ref": "#/$defs/table"
+    },
+    {
+      "$ref": "#/$defs/layout"
+    },
+    {
+      "$ref": "#/$defs/ruleset"
+    },
+    {
+      "$ref": "#/$defs/pack"
+    }
+  ]
+}

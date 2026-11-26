@@ -1,0 +1,45 @@
+{
+  "kind": "pack",
+  "id": "parlor.pack.parchment",
+  "format": 1,
+  "version": "1.0.0",
+  "name": "Parchment",
+  "author": {
+    "name": "Parlor"
+  },
+  "description": "Warm paper stock, square corners and a striped green back.",
+  "price": {
+    "type": "free"
+  },
+  "preview": {
+    "deck": "parlor.deck.parchment",
+    "table": "parlor.table.baize"
+  },
+  "contents": [
+    "parlor.deck.parchment"
+  ],
+  "definitions": [
+    {
+      "kind": "deck",
+      "id": "parlor.deck.parchment",
+      "version": "1.0.0",
+      "name": "Parchment",
+      "face": {
+        "color": "#f1e6cc",
+        "edge": "#c9b48a"
+      },
+      "suits": {
+        "hearts": "#9c2a1a",
+        "diamonds": "#9c2a1a",
+        "spades": "#2b2118",
+        "clubs": "#2b2118"
+      },
+      "corners": "square",
+      "back": {
+        "pattern": "stripes",
+        "color": "#3d5a3a",
+        "line": "#6f8f63"
+      }
+    }
+  ]
+}

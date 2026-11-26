@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "parlor-settings.schema.json",
+  "title": "Parlor settings",
+  "description": "Preferences for the Parlor card-game suite. Unknown keys are ignored on import; missing keys fall back to defaults.",
+  "type": "object",
+  "required": [
+    "app",
+    "version"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "app": {
+      "const": "parlor"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "File format version. Readers skip keys they don't know from newer versions."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Optional preset name shown on import, e.g. \"Big cards for phones\"."
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 280
+    },
+    "appearance": {
+      "type": "object",
+      "title": "Appearance",
+      "properties": {
+        "theme": {
+          "enum": [
+            "system",
+            "light",
+            "dark"
+          ],
+          "default": "system",
+          "title": "Theme",
+          "x-labels": {
+            "system": "Auto",
+            "light": "Day",
+            "dark": "Night"
+          }
+        },
+        "cardSize": {
+          "enum": [
+            "auto",
+            "small",
+            "medium",
+            "large"
+          ],
+          "default": "auto",
+          "title": "Card size",
+          "description": "Auto fills the table. Smaller sizes leave room around it.",
+          "x-labels": {
+            "auto": "Auto",
+            "small": "S",
+            "medium": "M",
+            "large": "L"
+          }
+        },
+        "cardStyle": {
+          "enum": [
+            "classic",
+            "large-index"
+          ],
+          "default": "classic",
+          "title": "Card corners",
+          "description": "Large index makes ranks easier to read on phones.",
+          "x-labels": {
+            "classic": "Classic",
+            "large-index": "Large index"
+          }
+        },
+        "fourColor": {
+          "type": "boolean",
+          "default": false,
+          "title": "Four-color deck",
+          "description": "Diamonds blue, clubs green."
+        },
+        "reduceMotion": {
+          "enum": [
+            "system",
+            "on",
+            "off"
+          ],
+          "default": "system",
+          "title": "Reduce motion",
+          "x-labels": {
+            "system": "Auto",
+            "on": "On",
+            "off": "Off"
+          }
+        },
+        "deck": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$",
+          "default": "parlor.deck.classic",
+          "title": "Deck",
+          "description": "Id of an installed deck definition. Unknown ids fall back to Classic."
+        },
+        "table": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$",
+          "default": "parlor.table.baize",
+          "title": "Table",
+          "description": "Id of an installed table definition. Unknown ids fall back to Green baize."
+        }
+      },
+      "additionalProperties": true
+    },
+    "play": {
+      "type": "object",
+      "title": "Play",
+      "properties": {
+        "input": {
+          "enum": [
+            "both",
+            "tap",
+            "drag"
+          ],
+          "default": "both",
+          "title": "Move cards by",
+          "x-labels": {
+            "both": "Tap or drag",
+            "tap": "Tap",
+            "drag": "Drag"
+          }
+        },
+        "autoMove": {
+          "enum": [
+            "off",
+            "safe",
+            "always"
+          ],
+          "default": "safe",
+          "title": "Auto-move to foundations",
+          "description": "Safe moves only cards nothing else can use.",
+          "x-labels": {
+            "off": "Off",
+            "safe": "Safe",
+            "always": "Always"
+          }
+        },
+        "hints": {
+          "type": "boolean",
+          "default": true,
+          "title": "Hints"
+        },
+        "showTimer": {
+          "type": "boolean",
+          "default": true,
+          "title": "Show timer"
+        },
+        "showMoves": {
+          "type": "boolean",
+          "default": true,
+          "title": "Show move count"
+        },
+        "confirmNewGame": {
+          "type": "boolean",
+          "default": true,
+          "title": "Ask before leaving a game"
+        },
+        "leftHanded": {
+          "type": "boolean",
+          "default": false,
+          "title": "Left-handed layout",
+          "description": "Free cells move to the right, foundations to the left."
+        }
+      },
+      "additionalProperties": true
+    },
+    "freecell": {
+      "type": "object",
+      "title": "FreeCell",
+      "properties": {
+        "deal": {
+          "enum": [
+            "random",
+            "daily",
+            "ascending"
+          ],
+          "default": "random",
+          "title": "New games",
+          "x-labels": {
+            "random": "Random",
+            "daily": "Daily deal",
+            "ascending": "In order"
+          }
+        },
+        "freeCells": {
+          "enum": [
+            4,
+            3,
+            2,
+            1
+          ],
+          "default": 4,
+          "title": "Free cells",
+          "description": "Fewer cells, harder game.",
+          "x-labels": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4"
+          }
+        },
+        "supermoves": {
+          "type": "boolean",
+          "default": true,
+          "title": "Move runs in one go",
+          "description": "Moves as many cards as your free spaces allow."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

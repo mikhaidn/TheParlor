@@ -1,0 +1,55 @@
+{
+  "kind": "pack",
+  "id": "parlor.pack.bakers-game",
+  "format": 1,
+  "version": "1.0.0",
+  "name": "Baker's Game",
+  "author": {
+    "name": "Parlor"
+  },
+  "description": "FreeCell's stricter ancestor: build down by suit, not by color.",
+  "price": {
+    "type": "free"
+  },
+  "preview": {
+    "game": "freecell"
+  },
+  "contents": [
+    "parlor.rules.bakers-game"
+  ],
+  "definitions": [
+    {
+      "kind": "ruleset",
+      "id": "parlor.rules.bakers-game",
+      "version": "1.0.0",
+      "name": "Baker's Game",
+      "layout": "parlor.layout.freecell",
+      "deal": {
+        "method": "numbered",
+        "to": "tableau",
+        "faceUp": true
+      },
+      "zones": {
+        "cell": {
+          "pickUp": "top",
+          "build": "none",
+          "empty": "any",
+          "capacity": 1
+        },
+        "foundation": {
+          "pickUp": "none",
+          "build": "up-same-suit",
+          "empty": "A"
+        },
+        "tableau": {
+          "pickUp": "run",
+          "run": "down-same-suit",
+          "build": "down-same-suit",
+          "empty": "any"
+        }
+      },
+      "runLimit": "freecell",
+      "autoMove": "safe"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "parlor-settings.schema.json",
+  "app": "parlor",
+  "version": 1,
+  "name": "Big cards for phones",
+  "note": "Large corner index, four-color deck, tap to move. Good on small screens.",
+  "appearance": {
+    "theme": "system",
+    "cardSize": "auto",
+    "cardStyle": "large-index",
+    "fourColor": true,
+    "deck": "parlor.deck.classic",
+    "table": "parlor.table.baize",
+    "reduceMotion": "system"
+  },
+  "play": {
+    "input": "tap",
+    "autoMove": "always",
+    "hints": true,
+    "showTimer": true,
+    "showMoves": true,
+    "confirmNewGame": true,
+    "leftHanded": false
+  },
+  "freecell": {
+    "deal": "random",
+    "freeCells": 4,
+    "supermoves": true
+  }
+}
